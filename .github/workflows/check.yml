@@ -18,9 +18,3 @@ jobs:
               run:
                 cd ./lab_01/unit_tests
                 python3 -m unittest discover -p 'test_*.py'
-            - name: Upload pytest test results
-              uses: actions/upload-artifact@v4
-              with:
-                name: unittest-results-${{ matrix.python-version }}
-                path: junit/test-results-${{ matrix.python-version }}.xml
-              if: ${{ always() }}
