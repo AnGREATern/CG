@@ -11,7 +11,7 @@ def get_solve(points: list[QPointF]):
                 c = points[k]
                 ab = QLineF(a, b)
                 bc = QLineF(b, c)
-                if ab == bc:
+                if ab.dx() == bc.dx() and ab.dy() == bc.dy():
                     continue
                 ca = QLineF(c, a)
                 normal = bc.normalVector()

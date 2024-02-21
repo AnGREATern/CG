@@ -1,13 +1,26 @@
 name: Check
 on: push
 jobs:
-    lint:
+    test:
         runs-on: ubuntu-latest
+        strategy:
+            matrix:
+              python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         steps:
             - name: Checkout
               uses: actions/checkout@v3
+            - name: Install dependencies
+              uses: pip install ruff
             - name: Lint
-              run:  |
-                pip install ruff
+              run:  
                 ruff --output-format=github .
-
+            - name: Test
+              run:
+                cd ./lab_01/unit_tests
+                python3 -m unittest discover -p 'test_*.py'
+            - name: Upload pytest test results
+              uses: actions/upload-artifact@v4
+              with:
+                name: unittest-results-${{ matrix.python-version }}
+                path: junit/test-results-${{ matrix.python-version }}.xml
+              if: ${{ always() }}
