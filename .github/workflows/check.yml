@@ -7,8 +7,9 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
             - name: Install dependencies
-              run:
+              run: |
                 pip install ruff
+                pip install pyqt5
             - name: Lint
               run:  
                 ruff --output-format=github .
