@@ -14,11 +14,11 @@ def draw_point(graph: pg.PlotWidget, table: QTableWidget, point: QPointF) -> Non
     x_coords = [point.x()]
     y_coords = [point.y()]
     for i in range(row_pos):
-        x_coords.append(float(table.item(i, 0).text()))
-        y_coords.append(float(table.item(i, 1).text()))
+        x_coords.append(float(table.item(i, consts.TABLE_POS_X).text()))
+        y_coords.append(float(table.item(i, consts.TABLE_POS_Y).text()))
     table.insertRow(row_pos)
-    table.setItem(row_pos, 0, QTableWidgetItem(str(point.x())))
-    table.setItem(row_pos, 1, QTableWidgetItem(str(point.y())))
+    table.setItem(row_pos, consts.TABLE_POS_X, QTableWidgetItem(str(point.x())))
+    table.setItem(row_pos, consts.TABLE_POS_Y, QTableWidgetItem(str(point.y())))
     scatter = pg.ScatterPlotItem(x=x_coords, y=y_coords, size=consts.POINT_SIZE)
     graph.addItem(scatter)
 
@@ -26,7 +26,8 @@ def draw_point(graph: pg.PlotWidget, table: QTableWidget, point: QPointF) -> Non
 def get_points_list(table: QTableWidget) -> list[QPointF]:
     points = list()
     for i in range(table.rowCount()):
-        points.append(QPointF(float(table.item(i, 0).text()), float(table.item(i, 1).text())))
+        points.append(QPointF(float(table.item(i, consts.TABLE_POS_X).text()),
+                              float(table.item(i, consts.TABLE_POS_Y).text())))
     return points
 
 
@@ -66,8 +67,8 @@ class InputPoint(QWidget):
         self.le_x.setValidator(validator_float)
         self.le_y.setValidator(validator_float)
         if self.start_point:
-            self.le_x.setText(self.start_point.x())
-            self.le_y.setText(self.start_point.y())
+            self.le_x.setText(str(self.start_point.x()))
+            self.le_y.setText(str(self.start_point.y()))
 
         self.msgBox = QMessageBox()
         self.msgBox.setIcon(QMessageBox.Critical)
@@ -256,19 +257,19 @@ class Main(QMainWindow):
         self.input_point.show()
 
     def edit_point(self: QMainWindow) -> None:
-        if self.tw.currentRow() < 0:
+        if self.tw.currentRow() == consts.TABLE_NOT_SELECTED_ROW:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText(
                 "Для изменения необходимо нажать в списке на любую координату изменяемой точки в списке")
             self.msgBox.show()
             return
-        added_point = QPointF(float(self.tw.item(self.tw.currentRow(), 0).text()), 
-                              float(self.tw.item(self.tw.currentRow(), 0).text()))
+        added_point = QPointF(float(self.tw.item(self.tw.currentRow(), consts.TABLE_POS_X).text()), 
+                              float(self.tw.item(self.tw.currentRow(), consts.TABLE_POS_Y).text()))
         self.del_point()
         self.add_point(added_point)
 
     def del_point(self: QMainWindow) -> None:
-        if isinstance(self.tw.currentRow(), int):
+        if self.tw.currentRow() == consts.TABLE_NOT_SELECTED_ROW:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText("Для удаления необходимо нажать в списке на любую координату удаляемой точки в списке")
             self.msgBox.show()
