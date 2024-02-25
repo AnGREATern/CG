@@ -83,10 +83,10 @@ class InputPoint(QWidget):
             x.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.layout = QGridLayout(self)
-        self.layout.addWidget(self.l_points, 0, 0, 1, 2)
-        self.layout.addWidget(self.le_x, 1, 0)
-        self.layout.addWidget(self.le_y, 1, 1)
-        self.layout.addWidget(self.pb_add_point, 2, 0, 1, 2)
+        self.layout.addWidget(self.l_points, *consts.ADD_POINT_WINDOW_L_POINTS_LOCATION)
+        self.layout.addWidget(self.le_x, *consts.ADD_POINT_WINDOW_LE_X_LOCATION)
+        self.layout.addWidget(self.le_y, *consts.ADD_POINT_WINDOW_LE_Y_LOCATION)
+        self.layout.addWidget(self.pb_add_point, *consts.ADD_POINT_WINDOW_PB_ADD_POINT_LOCATION)
 
         self.pb_add_point.clicked.connect(self.add_point)
 
@@ -187,14 +187,14 @@ class Main(QMainWindow):
             x.setFont(QFont(consts.FONT_TYPE, consts.FONT_BIG_SIZE))
 
         self.layout = QGridLayout(self.main_widget)
-        self.layout.addWidget(self.graph, 0, 0, 6, 1)
-        self.layout.addWidget(self.l_points, 0, 1)
-        self.layout.addWidget(self.tw, 1, 1)
-        self.layout.addWidget(self.pb_add_point, 2, 1)
-        self.layout.addWidget(self.pb_edit_point, 3, 1)
-        self.layout.addWidget(self.pb_del_point, 4, 1)
-        self.layout.addWidget(self.pb_clear_graph, 5, 1)
-        self.layout.addWidget(self.pb_solve, 6, 0, 1, 2)
+        self.layout.addWidget(self.graph, *consts.MAIN_WINDOW_GRAPH_LOCATION)
+        self.layout.addWidget(self.l_points, *consts.MAIN_WINDOW_L_POINTS_LOCATION)
+        self.layout.addWidget(self.tw, *consts.MAIN_WINDOW_TABLE_LOCATION)
+        self.layout.addWidget(self.pb_add_point, *consts.MAIN_WINDOW_PB_ADD_POINT_LOCATION)
+        self.layout.addWidget(self.pb_edit_point, *consts.MAIN_WINDOW_PB_EDIT_POINT_LOCATION)
+        self.layout.addWidget(self.pb_del_point, *consts.MAIN_WINDOW_PB_DEL_POINT_LOCATION)
+        self.layout.addWidget(self.pb_clear_graph, *consts.MAIN_WINDOW_PB_CLEAR_LOCATION)
+        self.layout.addWidget(self.pb_solve, *consts.MAIN_WINDOW_PB_SOLVE_LOCATION)
 
         self.pb_add_point.clicked.connect(self.add_point)
         self.pb_edit_point.clicked.connect(self.edit_point)
@@ -319,7 +319,7 @@ class Main(QMainWindow):
         self.graph.plot([b.x(), m.x()], [b.y(), m.y()], pen='g')
         self.graph.plot([c.x(), m.x()], [c.y(), m.y()], pen='g')
         self.graph.addItem(pg.InfiniteLine(pos=consts.CENTER, pen='r'))
-        self.graph.addItem(pg.InfiniteLine(pos=consts.CENTER, angle=consts.CIRCLE - source_angle, pen='r'))
+        self.graph.addItem(pg.InfiniteLine(pos=consts.CENTER, angle=consts.CIRCLE_ANGLE - source_angle, pen='r'))
         self.solve_created = True
         angle_text = pg.TextItem(f"Угол: {round(angle)}°", color='r')
         self.graph.addItem(angle_text)

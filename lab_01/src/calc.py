@@ -25,7 +25,7 @@ def get_solve(points: list[QPointF]):
                 c_h = hc.intersects(ab)[1]
                 m = QLineF.intersects(ha, hb)[1]
                 source_angle = QLineF(QPointF(*consts.CENTER), m).angle()
-                angle = abs(source_angle % 180 - 90)
+                angle = abs(source_angle % consts.UNFOLDED_ANGLE - consts.RIGHT_ANGLE)
                 if ans is None or ans[0] < angle:
                     ans = (angle, source_angle, m, a, b, c, a_h, b_h, c_h)
     return ans
