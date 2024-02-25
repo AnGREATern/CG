@@ -281,8 +281,8 @@ class Main(QMainWindow):
         x_coords = []
         y_coords = []
         for i in range(self.tw.rowCount()):
-            x_coords.append(float(self.tw.item(i, 0).text()))
-            y_coords.append(float(self.tw.item(i, 1).text()))
+            x_coords.append(float(self.tw.item(i, consts.TABLE_POS_X).text()))
+            y_coords.append(float(self.tw.item(i, consts.TABLE_POS_Y).text()))
         scatter = pg.ScatterPlotItem(x=x_coords, y=y_coords, size=consts.POINT_SIZE)
         self.graph.addItem(scatter)
 
