@@ -15,5 +15,5 @@ jobs:
                 ruff --output-format=github .
             - name: Test
               run: |
-                cd ./lab_01/unit_tests
+                cd ./lab_01_34/unit_tests
                 python3 -m unittest discover -p 'test_*.py'
