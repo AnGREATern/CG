@@ -9,6 +9,7 @@ jobs:
             - name: Install dependencies
               run: |
                 pip install ruff
+                pip install pyqt5
                 pip install pyqtgraph
             - name: Lint
               run:  
