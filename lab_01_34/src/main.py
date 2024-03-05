@@ -1,24 +1,31 @@
 import consts
 from sys import argv
-import calc
+import geom
 from PyQt5.QtGui import QFont, QRegExpValidator
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel, QMessageBox, QTableWidget, \
     QHeaderView, QLineEdit, QMenuBar, QMainWindow, QTableWidgetItem, QAction
-from PyQt5.QtCore import QRegExp, Qt, QPointF
+from PyQt5.QtCore import QRegExp, Qt
 from pyqtgraph import PlotWidget, ScatterPlotItem, Point, InfiniteLine, TextItem
 
 
-def draw_point(graph: PlotWidget, table: QTableWidget, point: QPointF) -> None:
+CENTER = (0, 0)
+RIGHT_ANGLE = 90
+TABLE_POS_X = 0
+TABLE_POS_Y = 1
+TABLE_NOT_SELECTED_ROW = -1
+
+
+def draw_point(graph: PlotWidget, table: QTableWidget, point: Point) -> None:
     graph.clear()
     row_pos = table.rowCount()
     x_coords = [point.x()]
     y_coords = [point.y()]
     for i in range(row_pos):
-        x_coords.append(float(table.item(i, consts.TABLE_POS_X).text()))
-        y_coords.append(float(table.item(i, consts.TABLE_POS_Y).text()))
+        x_coords.append(float(table.item(i, TABLE_POS_X).text()))
+        y_coords.append(float(table.item(i, TABLE_POS_Y).text()))
     table.insertRow(row_pos)
-    table.setItem(row_pos, consts.TABLE_POS_X, QTableWidgetItem(str(point.x())))
-    table.setItem(row_pos, consts.TABLE_POS_Y, QTableWidgetItem(str(point.y())))
+    table.setItem(row_pos, TABLE_POS_X, QTableWidgetItem(str(point.x())))
+    table.setItem(row_pos, TABLE_POS_Y, QTableWidgetItem(str(point.y())))
     scatter = ScatterPlotItem(x=x_coords, y=y_coords, size=consts.POINT_SIZE)
     graph.addItem(scatter)
 
@@ -26,13 +33,13 @@ def draw_point(graph: PlotWidget, table: QTableWidget, point: QPointF) -> None:
 def get_points_list(table: QTableWidget) -> list[Point]:
     points = list()
     for i in range(table.rowCount()):
-        points.append(Point(float(table.item(i, consts.TABLE_POS_X).text()),
-                            float(table.item(i, consts.TABLE_POS_Y).text())))
+        points.append(Point(float(table.item(i, TABLE_POS_X).text()),
+                            float(table.item(i, TABLE_POS_Y).text())))
     return points
 
 
 class InputPoint(QWidget):
-    def __init__(self: QWidget, tw: QTableWidget, graph: PlotWidget, start_point: QPointF) -> None:
+    def __init__(self: QWidget, tw: QTableWidget, graph: PlotWidget, start_point: Point) -> None:
         super().__init__()
         self.tw = tw
         self.graph = graph
@@ -100,7 +107,7 @@ class InputPoint(QWidget):
             self.msgBox.show()
             return
         self.prepare_coords()
-        added_point = QPointF(float(self.le_x.text()), float(self.le_y.text()))
+        added_point = Point(float(self.le_x.text()), float(self.le_y.text()))
         if added_point in get_points_list(self.tw):
             self.msgBox.setText("Такая точка уже есть")
             self.msgBox.show()
@@ -216,7 +223,7 @@ class Main(QMainWindow):
                 self.msgBox.show()
                 return
             pos = self.graph.plotItem.vb.mapToView(pos)
-            added_point = QPointF(pos.x(), pos.y())
+            added_point = Point(pos.x(), pos.y())
             self.last_added_point_by_click = Point(pos.x(), pos.y())
             if added_point in get_points_list(self.tw):
                 self.msgBox.setWindowTitle("Инфо")
@@ -251,25 +258,25 @@ class Main(QMainWindow):
                             "Для отображения решения необходимо нажать на кнопку \"Построить решение\".")
         self.msgBox.show()
 
-    def add_point(self: QMainWindow, added_point: QPointF=None) -> None:
+    def add_point(self: QMainWindow, added_point: Point=None) -> None:
         self.solve_created = False
         self.input_point = InputPoint(self.tw, self.graph, added_point)
         self.input_point.show()
 
     def edit_point(self: QMainWindow) -> None:
-        if self.tw.currentRow() == consts.TABLE_NOT_SELECTED_ROW:
+        if self.tw.currentRow() == TABLE_NOT_SELECTED_ROW:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText(
                 "Для изменения необходимо нажать в списке на любую координату изменяемой точки в списке")
             self.msgBox.show()
             return
-        added_point = QPointF(float(self.tw.item(self.tw.currentRow(), consts.TABLE_POS_X).text()), 
-                              float(self.tw.item(self.tw.currentRow(), consts.TABLE_POS_Y).text()))
+        added_point = Point(float(self.tw.item(self.tw.currentRow(), TABLE_POS_X).text()), 
+                              float(self.tw.item(self.tw.currentRow(), TABLE_POS_Y).text()))
         self.del_point()
         self.add_point(added_point)
 
     def del_point(self: QMainWindow) -> None:
-        if self.tw.currentRow() == consts.TABLE_NOT_SELECTED_ROW:
+        if self.tw.currentRow() == TABLE_NOT_SELECTED_ROW:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText("Для удаления необходимо нажать в списке на любую координату удаляемой точки в списке")
             self.msgBox.show()
@@ -281,8 +288,8 @@ class Main(QMainWindow):
         x_coords = []
         y_coords = []
         for i in range(self.tw.rowCount()):
-            x_coords.append(float(self.tw.item(i, consts.TABLE_POS_X).text()))
-            y_coords.append(float(self.tw.item(i, consts.TABLE_POS_Y).text()))
+            x_coords.append(float(self.tw.item(i, TABLE_POS_X).text()))
+            y_coords.append(float(self.tw.item(i, TABLE_POS_Y).text()))
         scatter = ScatterPlotItem(x=x_coords, y=y_coords, size=consts.POINT_SIZE)
         self.graph.addItem(scatter)
 
@@ -292,18 +299,12 @@ class Main(QMainWindow):
         self.tw.setRowCount(0)
 
     def print_solve(self: QMainWindow) -> None:
-        if self.tw.rowCount() < consts.NODE_COUNT:
-            self.msgBox.setWindowTitle("Инфо")
-            self.msgBox.setText("Введено слишком мало точек для поиска треугольника." +
-                                "\nВведите хотя бы 3 точки, не лежащих на одной прямой.")
-            self.msgBox.show()
-            return
         if self.solve_created:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText("Решение для данного множество точек уже построено")
             self.msgBox.show()
             return
-        ans = calc.get_solution(get_points_list(self.tw))
+        ans = geom.find_max_angle(get_points_list(self.tw))
         if ans is None:
             self.msgBox.setWindowTitle("Инфо")
             self.msgBox.setText("Не удалось построить ни одного треугольника." +
@@ -318,8 +319,8 @@ class Main(QMainWindow):
         self.graph.plot([a.x(), m.x()], [a.y(), m.y()], pen='g')
         self.graph.plot([b.x(), m.x()], [b.y(), m.y()], pen='g')
         self.graph.plot([c.x(), m.x()], [c.y(), m.y()], pen='g')
-        self.graph.addItem(InfiniteLine(pos=consts.CENTER, pen='r'))
-        self.graph.addItem(InfiniteLine(pos=consts.CENTER, angle=source_angle + consts.RIGHT_ANGLE, pen='r'))
+        self.graph.addItem(InfiniteLine(pos=CENTER, pen='r'))
+        self.graph.addItem(InfiniteLine(pos=CENTER, angle=source_angle + RIGHT_ANGLE, pen='r'))
         self.solve_created = True
         angle_text = TextItem(f"Угол: {round(angle)}°", color='r')
         self.graph.addItem(angle_text)
