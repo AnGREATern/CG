@@ -56,46 +56,47 @@ class InputPoint(QWidget):
         else:
             self.setWindowTitle('Добавление точки')
 
-        standard_font_size_elems = []
-
-        self.l_points = QLabel(self)
-        if self.start_point:
-            self.l_points.setText("Введите новые координаты точки:")
-        else:
-            self.l_points.setText("Введите координаты добавляемой точки:")
-        standard_font_size_elems.append(self.l_points)
-
-        validator_float = QRegExpValidator(QRegExp('^[+-]?[0-9][0-9]*[.,]?[0-9]*$'))
-
-        self.le_x = QLineEdit()
-        standard_font_size_elems.append(self.le_x)
-        self.le_y = QLineEdit()
-        standard_font_size_elems.append(self.le_y)
-        self.le_x.setValidator(validator_float)
-        self.le_y.setValidator(validator_float)
-        if self.start_point:
-            self.le_x.setText(str(self.start_point.x()))
-            self.le_y.setText(str(self.start_point.y()))
+        self.ui_labels()
+        self.ui_line_edits()
 
         self.msgBox = QMessageBox()
         self.msgBox.setIcon(QMessageBox.Critical)
         self.msgBox.setWindowTitle("Ошибка")
         self.msgBox.setStandardButtons(QMessageBox.Ok)
-        standard_font_size_elems.append(self.msgBox)
+        self.msgBox.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.pb_add_point = QPushButton("Добавить точку")
-        standard_font_size_elems.append(self.pb_add_point)
+        self.pb_add_point.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
-        for x in standard_font_size_elems:
-            x.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+        self.ui_layout()
 
+        self.pb_add_point.clicked.connect(self.add_point)
+
+    def ui_line_edits(self) -> None:
+        validator_float = QRegExpValidator(QRegExp('^[+-]?[0-9][0-9]*[.,]?[0-9]*$'))
+        self.le_x = QLineEdit()
+        self.le_y = QLineEdit()
+        for le in (self.le_x, self.le_y):
+            le.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+            le.setValidator(validator_float)
+        if self.start_point:
+            self.le_x.setText(str(self.start_point.x()))
+            self.le_y.setText(str(self.start_point.y()))
+
+    def ui_labels(self) -> None:
+        self.l_points = QLabel(self)
+        if self.start_point:
+            self.l_points.setText("Введите новые координаты точки:")
+        else:
+            self.l_points.setText("Введите координаты добавляемой точки:")
+        self.l_points.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+
+    def ui_layout(self) -> None:
         self.layout = QGridLayout(self)
         self.layout.addWidget(self.l_points, *consts.ADD_POINT_WINDOW_L_POINTS_LOCATION)
         self.layout.addWidget(self.le_x, *consts.ADD_POINT_WINDOW_LE_X_LOCATION)
         self.layout.addWidget(self.le_y, *consts.ADD_POINT_WINDOW_LE_Y_LOCATION)
         self.layout.addWidget(self.pb_add_point, *consts.ADD_POINT_WINDOW_PB_ADD_POINT_LOCATION)
-
-        self.pb_add_point.clicked.connect(self.add_point)
 
     def add_point(self: QWidget) -> None:
         if not self.le_x.text():
@@ -135,24 +136,53 @@ class Main(QMainWindow):
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
-        standard_font_size_elems = []
-        big_font_size_elems = []
+        self.ui_table()
+        self.ui_graph()
+        self.ui_buttons()
+        self.ui_menu_bar()
 
+        self.msgBox = QMessageBox()
+        self.msgBox.setIcon(QMessageBox.Information)
+        self.msgBox.setStandardButtons(QMessageBox.Ok)
+        self.msgBox.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+
+        self.l_points = QLabel(self)
+        self.l_points.setText("Множество точек:")
+        self.l_points.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+
+        self.ui_layout()
+        self.connecter()        
+
+    def ui_graph(self) -> None:
+        self.graph = PlotWidget()
+        self.graph.showGrid(x=True, y=True)
+        self.graph.setMenuEnabled(False)
+        self.graph.hideButtons()
+        self.graph.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+
+    def ui_table(self) -> None:
         self.tw = QTableWidget(self.main_widget)
         self.tw.setColumnCount(len(consts.HEADERS))
         self.tw.setHorizontalHeaderLabels(consts.HEADERS)
         tw_header = self.tw.horizontalHeader()
         tw_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        standard_font_size_elems.append(tw_header)
+        tw_header.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
         self.tw.setEditTriggers(QTableWidget.NoEditTriggers)
-        standard_font_size_elems.append(self.tw)
+        self.tw.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
-        self.graph = PlotWidget()
-        self.graph.showGrid(x=True, y=True)
-        self.graph.setMenuEnabled(False)
-        self.graph.hideButtons()
-        standard_font_size_elems.append(self.graph)
+    def ui_menu_bar(self) -> None:
+        self.mb = QMenuBar(self)
+        self.setMenuBar(self.mb)
+        self.info = self.mb.addMenu("Информация")
+        self.about = QAction("Об авторе", self)
+        self.task = QAction("Условие задачи", self)
+        self.instruction = QAction("Инструкция", self)
+        self.info.addAction(self.about)
+        self.info.addAction(self.task)
+        self.info.addAction(self.instruction)
 
+    def ui_buttons(self) -> None:
+        standard_font_size_elems = []
         self.pb_add_point = QPushButton("Добавить точку")
         standard_font_size_elems.append(self.pb_add_point)
         self.pb_edit_point = QPushButton("Изменить точку")
@@ -163,36 +193,11 @@ class Main(QMainWindow):
         standard_font_size_elems.append(self.pb_clear_graph)
         self.pb_solve = QPushButton("Построить решение")
         self.pb_solve.setMinimumHeight(consts.BIG_ELEMS_MINIMUM_SIZE)
-        big_font_size_elems.append(self.pb_solve)
-
-        self.msgBox = QMessageBox()
-        self.msgBox.setIcon(QMessageBox.Information)
-        self.msgBox.setStandardButtons(QMessageBox.Ok)
-        standard_font_size_elems.append(self.msgBox)
-
-        self.l_points = QLabel(self)
-        self.l_points.setText("Множество точек:")
-        standard_font_size_elems.append(self.l_points)
-
-        self.mb = QMenuBar(self)
-        self.setMenuBar(self.mb)
-        self.info = self.mb.addMenu("Информация")
-        self.about = QAction("Об авторе", self)
-        self.task = QAction("Условие задачи", self)
-        self.instruction = QAction("Инструкция", self)
-        self.info.addAction(self.about)
-        self.info.addAction(self.task)
-        self.info.addAction(self.instruction)
-        self.about.triggered.connect(self.show_about)
-        self.task.triggered.connect(self.show_task)
-        self.instruction.triggered.connect(self.show_instruction)
-
         for x in standard_font_size_elems:
             x.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
+        self.pb_solve.setFont(QFont(consts.FONT_TYPE, consts.FONT_BIG_SIZE))
 
-        for x in big_font_size_elems:
-            x.setFont(QFont(consts.FONT_TYPE, consts.FONT_BIG_SIZE))
-
+    def ui_layout(self) -> None:
         self.layout = QGridLayout(self.main_widget)
         self.layout.addWidget(self.graph, *consts.MAIN_WINDOW_GRAPH_LOCATION)
         self.layout.addWidget(self.l_points, *consts.MAIN_WINDOW_L_POINTS_LOCATION)
@@ -203,12 +208,16 @@ class Main(QMainWindow):
         self.layout.addWidget(self.pb_clear_graph, *consts.MAIN_WINDOW_PB_CLEAR_LOCATION)
         self.layout.addWidget(self.pb_solve, *consts.MAIN_WINDOW_PB_SOLVE_LOCATION)
 
+    def connecter(self) -> None:
         self.pb_add_point.clicked.connect(self.add_point)
         self.pb_edit_point.clicked.connect(self.edit_point)
         self.pb_del_point.clicked.connect(self.del_point)
         self.pb_clear_graph.clicked.connect(self.clear_graph)
         self.pb_solve.clicked.connect(self.print_solve)
         self.tw.cellClicked.connect(self.highlight_line)
+        self.about.triggered.connect(self.show_about)
+        self.task.triggered.connect(self.show_task)
+        self.instruction.triggered.connect(self.show_instruction)
         self.graph.scene().sigMouseClicked.connect(self.graph_clicked)
 
     def graph_clicked(self: QMainWindow, ev) -> None:
