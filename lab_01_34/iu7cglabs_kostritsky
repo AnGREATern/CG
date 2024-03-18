@@ -1,0 +1,41 @@
+SHELL := /bin/bash
+
+OUT_DIR := out/
+UNITS := unit_tests/*.py
+SRCS := src/*.py
+
+MAKE_DIR := mkdir -p
+COPY := cp
+REMOVE := rm -f
+REMOVE_DIR := rm -rf
+MOVE := mv
+
+report-unittesting-latest.txt : ${UNITS}
+	coverage run -m unittest ${UNITS}
+	echo -n " " > $@
+	coverage report | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	${REMOVE} .coverage
+
+${OUT_DIR}:
+	${MAKE_DIR} ${OUT_DIR}
+
+.PHONY : run clean release format checkall saveolds
+
+run : release 
+	python3 ${OUT_DIR}main.py
+
+clean :
+	${REMOVE} report-unittesting-latest.txt
+	${REMOVE_DIR} ${OUT_DIR}
+
+release : ${OUT_DIR} 
+	${COPY} ${SRCS} ${OUT_DIR}
+
+format :
+	ruff format
+
+checkall :
+	ruff check
+
+saveolds :
+	${COPY} report-unittesting-latest.txt report-unittesting-old.txt

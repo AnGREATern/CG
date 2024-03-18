@@ -10,6 +10,8 @@ Solving a system of two dot products:
 am * bc = 0
 cm * ab = 0
 """
+
+
 def orthocenter(a: Point, b: Point, c: Point) -> Point:
     if b.y() != a.y():
         k_ba = (b.x() - a.x()) / (b.y() - a.y())
@@ -31,13 +33,17 @@ def orthocenter(a: Point, b: Point, c: Point) -> Point:
 """
 Vector projection a on b
 """
+
+
 def projection(a: Point, b: Point) -> Point:
-    return b * (Point.dotProduct(a, b) / b.length()**2)
+    return b * (Point.dotProduct(a, b) / b.length() ** 2)
 
 
 """
 Finding the maximum angle between OY and the straight line connecting the orthocenter to (0, 0)
 """
+
+
 def find_max_angle(points: list[Point]):
     ans = None
     for i in range(len(points)):

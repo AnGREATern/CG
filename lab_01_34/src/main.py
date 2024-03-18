@@ -2,8 +2,21 @@ import consts
 from sys import argv
 import geom
 from PyQt5.QtGui import QFont, QRegExpValidator
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel, QMessageBox, QTableWidget, \
-    QHeaderView, QLineEdit, QMenuBar, QMainWindow, QTableWidgetItem, QAction
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QPushButton,
+    QGridLayout,
+    QLabel,
+    QMessageBox,
+    QTableWidget,
+    QHeaderView,
+    QLineEdit,
+    QMenuBar,
+    QMainWindow,
+    QTableWidgetItem,
+    QAction,
+)
 from PyQt5.QtCore import QRegExp, Qt
 from pyqtgraph import PlotWidget, ScatterPlotItem, Point, InfiniteLine, TextItem
 
@@ -33,13 +46,19 @@ def draw_point(graph: PlotWidget, table: QTableWidget, point: Point) -> None:
 def get_points_list(table: QTableWidget) -> list[Point]:
     points = list()
     for i in range(table.rowCount()):
-        points.append(Point(float(table.item(i, TABLE_POS_X).text()),
-                            float(table.item(i, TABLE_POS_Y).text())))
+        points.append(
+            Point(
+                float(table.item(i, TABLE_POS_X).text()),
+                float(table.item(i, TABLE_POS_Y).text()),
+            )
+        )
     return points
 
 
 class InputPoint(QWidget):
-    def __init__(self: QWidget, tw: QTableWidget, graph: PlotWidget, start_point: Point) -> None:
+    def __init__(
+        self: QWidget, tw: QTableWidget, graph: PlotWidget, start_point: Point
+    ) -> None:
         super().__init__()
         self.tw = tw
         self.graph = graph
@@ -52,9 +71,9 @@ class InputPoint(QWidget):
         self.setMinimumSize(*consts.SCREEN_INPUT_POINT_SIZE)
         self.setMaximumSize(*consts.SCREEN_INPUT_POINT_SIZE)
         if self.start_point:
-            self.setWindowTitle('Изменение точки')
+            self.setWindowTitle("Изменение точки")
         else:
-            self.setWindowTitle('Добавление точки')
+            self.setWindowTitle("Добавление точки")
 
         self.ui_labels()
         self.ui_line_edits()
@@ -73,7 +92,7 @@ class InputPoint(QWidget):
         self.pb_add_point.clicked.connect(self.add_point)
 
     def ui_line_edits(self) -> None:
-        validator_float = QRegExpValidator(QRegExp('^[+-]?[0-9][0-9]*[.,]?[0-9]*$'))
+        validator_float = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*[.,]?[0-9]*$"))
         self.le_x = QLineEdit()
         self.le_y = QLineEdit()
         for le in (self.le_x, self.le_y):
@@ -96,7 +115,9 @@ class InputPoint(QWidget):
         self.layout.addWidget(self.l_points, *consts.ADD_POINT_WINDOW_L_POINTS_LOCATION)
         self.layout.addWidget(self.le_x, *consts.ADD_POINT_WINDOW_LE_X_LOCATION)
         self.layout.addWidget(self.le_y, *consts.ADD_POINT_WINDOW_LE_Y_LOCATION)
-        self.layout.addWidget(self.pb_add_point, *consts.ADD_POINT_WINDOW_PB_ADD_POINT_LOCATION)
+        self.layout.addWidget(
+            self.pb_add_point, *consts.ADD_POINT_WINDOW_PB_ADD_POINT_LOCATION
+        )
 
     def add_point(self: QWidget) -> None:
         if not self.le_x.text():
@@ -117,8 +138,8 @@ class InputPoint(QWidget):
         self.close()
 
     def prepare_coords(self: QWidget) -> None:
-        self.le_x.setText(self.le_x.text().replace(',', '.'))
-        self.le_y.setText(self.le_y.text().replace(',', '.'))
+        self.le_x.setText(self.le_x.text().replace(",", "."))
+        self.le_y.setText(self.le_y.text().replace(",", "."))
 
 
 class Main(QMainWindow):
@@ -131,7 +152,7 @@ class Main(QMainWindow):
 
     def init_ui(self: QMainWindow) -> None:
         self.resize(*consts.SCREEN_START_SIZE)
-        self.setWindowTitle('Задача №1')
+        self.setWindowTitle("Задача №1")
         self.setMinimumSize(*consts.SCREEN_START_SIZE)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
@@ -151,7 +172,7 @@ class Main(QMainWindow):
         self.l_points.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.ui_layout()
-        self.connecter()        
+        self.connecter()
 
     def ui_graph(self) -> None:
         self.graph = PlotWidget()
@@ -202,10 +223,18 @@ class Main(QMainWindow):
         self.layout.addWidget(self.graph, *consts.MAIN_WINDOW_GRAPH_LOCATION)
         self.layout.addWidget(self.l_points, *consts.MAIN_WINDOW_L_POINTS_LOCATION)
         self.layout.addWidget(self.tw, *consts.MAIN_WINDOW_TABLE_LOCATION)
-        self.layout.addWidget(self.pb_add_point, *consts.MAIN_WINDOW_PB_ADD_POINT_LOCATION)
-        self.layout.addWidget(self.pb_edit_point, *consts.MAIN_WINDOW_PB_EDIT_POINT_LOCATION)
-        self.layout.addWidget(self.pb_del_point, *consts.MAIN_WINDOW_PB_DEL_POINT_LOCATION)
-        self.layout.addWidget(self.pb_clear_graph, *consts.MAIN_WINDOW_PB_CLEAR_LOCATION)
+        self.layout.addWidget(
+            self.pb_add_point, *consts.MAIN_WINDOW_PB_ADD_POINT_LOCATION
+        )
+        self.layout.addWidget(
+            self.pb_edit_point, *consts.MAIN_WINDOW_PB_EDIT_POINT_LOCATION
+        )
+        self.layout.addWidget(
+            self.pb_del_point, *consts.MAIN_WINDOW_PB_DEL_POINT_LOCATION
+        )
+        self.layout.addWidget(
+            self.pb_clear_graph, *consts.MAIN_WINDOW_PB_CLEAR_LOCATION
+        )
         self.layout.addWidget(self.pb_solve, *consts.MAIN_WINDOW_PB_SOLVE_LOCATION)
 
     def connecter(self) -> None:
@@ -213,7 +242,7 @@ class Main(QMainWindow):
         self.pb_edit_point.clicked.connect(self.edit_point)
         self.pb_del_point.clicked.connect(self.del_point)
         self.pb_clear_graph.clicked.connect(self.clear_graph)
-        self.pb_solve.clicked.connect(self.print_solve)
+        self.pb_solve.clicked.connect(self.print_max_angle)
         self.tw.cellClicked.connect(self.highlight_line)
         self.about.triggered.connect(self.show_about)
         self.task.triggered.connect(self.show_task)
@@ -226,69 +255,74 @@ class Main(QMainWindow):
         elif ev.button() == Qt.MouseButton.LeftButton:
             self.solve_created = False
             pos = ev.pos()
-            if self.last_added_point_by_click is not None and pos == self.last_added_point_by_click:
-                self.msgBox.setWindowTitle("Инфо")
-                self.msgBox.setText("Данная точка была добавлена в множество ранее")
-                self.msgBox.show()
+            if (
+                self.last_added_point_by_click is not None
+                and pos == self.last_added_point_by_click
+            ):
+                self.show_message_box(
+                    "Инфо", "Данная точка была добавлена в множество ранее"
+                )
                 return
             pos = self.graph.plotItem.vb.mapToView(pos)
             added_point = Point(pos.x(), pos.y())
             self.last_added_point_by_click = Point(pos.x(), pos.y())
             if added_point in get_points_list(self.tw):
-                self.msgBox.setWindowTitle("Инфо")
-                self.msgBox.setText("Данная точка была добавлена в множество ранее")
-                self.msgBox.show()
+                self.show_message_box(
+                    "Инфо", "Данная точка была добавлена в множество ранее"
+                )
             else:
                 draw_point(self.graph, self.tw, added_point)
 
     def show_about(self: QMainWindow) -> None:
-        self.msgBox.setWindowTitle("Об авторе")
-        self.msgBox.setText("Выполнил Романов Владислав\nГруппа ИУ7-45Б")
-        self.msgBox.show()
+        self.show_message_box("Об авторе", "Выполнил Романов Владислав\nГруппа ИУ7-45Б")
 
     def show_task(self: QMainWindow) -> None:
-        self.msgBox.setWindowTitle("Условие задачи")
-        self.msgBox.setText(
-            "34. На плоскости дано множество точек. Найти такой треугольник" +
-            ", с вершинами в этих точках, у которого угол, образованный прямой" +
-            ", соединяющий точку пересечения высот и начала координат, и осью ординат максимален.\n\n" +
-            "Вывести изображение в графическом режиме.")
-        self.msgBox.show()
+        self.show_message_box(
+            "Условие задачи",
+            "34. На плоскости дано множество точек. Найти такой треугольник"
+            + ", с вершинами в этих точках, у которого угол, образованный прямой"
+            + ", соединяющий точку пересечения высот и начала координат, и осью ординат максимален.\n\n"
+            + "Вывести изображение в графическом режиме.",
+        )
 
     def show_instruction(self: QMainWindow) -> None:
-        self.msgBox.setWindowTitle("Помощь")
-        self.msgBox.setText("Для добавления точки можно либо поставить точку мышью на графике, либо вбить координаты " +
-                            "вручную после нажатия на кнопку \"Добавить точку\".\n\n" +
-                            "Для изменения (удаления) точки необходимо выбрать " +
-                            "её в списке, после чего нажать на кнопку \"Изменить точку\" (\"Удалить точку\").\n\n" +
-                            "Колёсиком мыши можно изменять масштаб графика. Поставить автомасштабирование можно " +
-                            "нажатием на правую кнопку мыши в области графика. " +
-                            "Режим автомасштабирования выбран изначально.\n\n" +
-                            "Для отображения решения необходимо нажать на кнопку \"Построить решение\".")
-        self.msgBox.show()
+        self.show_message_box(
+            "Помощь",
+            "Для добавления точки можно либо поставить точку мышью на графике, либо вбить координаты "
+            + 'вручную после нажатия на кнопку "Добавить точку".\n\n'
+            + "Для изменения (удаления) точки необходимо выбрать "
+            + 'её в списке, после чего нажать на кнопку "Изменить точку" ("Удалить точку").\n\n'
+            + "Колёсиком мыши можно изменять масштаб графика. Поставить автомасштабирование можно "
+            + "нажатием на правую кнопку мыши в области графика. "
+            + "Режим автомасштабирования выбран изначально.\n\n"
+            + 'Для отображения решения необходимо нажать на кнопку "Построить решение".',
+        )
 
-    def add_point(self: QMainWindow, added_point: Point=None) -> None:
+    def add_point(self: QMainWindow, added_point: Point = None) -> None:
         self.solve_created = False
         self.input_point = InputPoint(self.tw, self.graph, added_point)
         self.input_point.show()
 
     def edit_point(self: QMainWindow) -> None:
         if self.tw.currentRow() == TABLE_NOT_SELECTED_ROW:
-            self.msgBox.setWindowTitle("Инфо")
-            self.msgBox.setText(
-                "Для изменения необходимо нажать в списке на любую координату изменяемой точки в списке")
-            self.msgBox.show()
+            self.show_message_box(
+                "Инфо",
+                "Для изменения необходимо нажать в списке на любую координату изменяемой точки в списке",
+            )
             return
-        added_point = Point(float(self.tw.item(self.tw.currentRow(), TABLE_POS_X).text()), 
-                              float(self.tw.item(self.tw.currentRow(), TABLE_POS_Y).text()))
+        added_point = Point(
+            float(self.tw.item(self.tw.currentRow(), TABLE_POS_X).text()),
+            float(self.tw.item(self.tw.currentRow(), TABLE_POS_Y).text()),
+        )
         self.del_point()
         self.add_point(added_point)
 
     def del_point(self: QMainWindow) -> None:
         if self.tw.currentRow() == TABLE_NOT_SELECTED_ROW:
-            self.msgBox.setWindowTitle("Инфо")
-            self.msgBox.setText("Для удаления необходимо нажать в списке на любую координату удаляемой точки в списке")
-            self.msgBox.show()
+            self.show_message_box(
+                "Инфо",
+                "Для удаления необходимо нажать в списке на любую координату удаляемой точки в списке",
+            )
             return
         self.solve_created = False
         self.tw.removeRow(self.tw.currentRow())
@@ -307,39 +341,60 @@ class Main(QMainWindow):
         self.graph.clear()
         self.tw.setRowCount(0)
 
-    def print_solve(self: QMainWindow) -> None:
+    def print_max_angle(self: QMainWindow) -> None:
         if self.solve_created:
-            self.msgBox.setWindowTitle("Инфо")
-            self.msgBox.setText("Решение для данного множество точек уже построено")
-            self.msgBox.show()
+            self.show_message_box(
+                "Инфо", "Решение для данного множество точек уже построено"
+            )
             return
         ans = geom.find_max_angle(get_points_list(self.tw))
         if ans is None:
-            self.msgBox.setWindowTitle("Инфо")
-            self.msgBox.setText("Не удалось построить ни одного треугольника." +
-                                "\nВведите хотя бы 3 точки, не лежащих на одной прямой.")
-            self.msgBox.show()
-            return
-        angle, source_angle, m, a, b, c, a_h, b_h, c_h = ans
-        self.graph.plot([a.x(), b.x(), c.x(), a.x()], [a.y(), b.y(), c.y(), a.y()], symbolSize=consts.POINT_SIZE)
-        self.graph.plot([a.x(), a_h.x()], [a.y(), a_h.y()], pen='g')
-        self.graph.plot([b.x(), b_h.x()], [b.y(), b_h.y()], pen='g')
-        self.graph.plot([c.x(), c_h.x()], [c.y(), c_h.y()], pen='g')
-        self.graph.plot([a.x(), m.x()], [a.y(), m.y()], pen='g')
-        self.graph.plot([b.x(), m.x()], [b.y(), m.y()], pen='g')
-        self.graph.plot([c.x(), m.x()], [c.y(), m.y()], pen='g')
-        self.graph.addItem(InfiniteLine(pos=CENTER, pen='r'))
-        self.graph.addItem(InfiniteLine(pos=CENTER, angle=source_angle + RIGHT_ANGLE, pen='r'))
-        self.solve_created = True
-        angle_text = TextItem(f"Угол: {round(angle)}°", color='r')
-        self.graph.addItem(angle_text)
+            self.show_message_box(
+                "Инфо",
+                "Не удалось построить ни одного треугольника."
+                + "\nВведите хотя бы 3 точки, не лежащих на одной прямой.",
+            )
+        else:
+            angle, source_angle, m, a, b, c, a_h, b_h, c_h = ans
+            self.print_triangle(a, b, c, a_h, b_h, c_h, m)
+            self.graph.addItem(InfiniteLine(pos=CENTER, pen="r"))
+            self.graph.addItem(
+                InfiniteLine(pos=CENTER, angle=source_angle + RIGHT_ANGLE, pen="r")
+            )
+            self.solve_created = True
+            angle_text = TextItem(f"Угол: {round(angle)}°", color="r")
+            self.graph.addItem(angle_text)
+
+    def print_triangle(
+        self, a: Point, b: Point, c: Point, a_h: Point, b_h: Point, c_h: Point, m: Point
+    ):
+        for line in (
+            (a, b, "w"),
+            (b, c, "w"),
+            (a, c, "w"),
+            (a, a_h, "g"),
+            (b, b_h, "g"),
+            (c, c_h, "g"),
+            (a, m, "g"),
+            (b, m, "g"),
+            (c, m, "g"),
+        ):
+            self.print_line(*line)
+
+    def print_line(self, a: Point, b: Point, color: str):
+        self.graph.plot([a.x(), b.x()], [a.y(), b.y()], pen=color)
 
     def highlight_line(self: QMainWindow) -> None:
         if isinstance(self.tw.currentRow(), int):
             self.tw.selectRow(self.tw.currentRow())
 
+    def show_message_box(self, title: str, message: str):
+        self.msgBox.setWindowTitle(title)
+        self.msgBox.setText(message)
+        self.msgBox.show()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(argv)
 
     window = Main()
