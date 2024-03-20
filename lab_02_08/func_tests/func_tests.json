@@ -1,0 +1,46 @@
+[
+    {
+    "name": "test_1",
+    "desc": "Кузнечик в исходном положении",
+    "data": 
+        [
+        ]
+    },
+    {
+    "name": "test_2",
+    "desc": "Кузнечик поел и пошёл вправо по OX",
+    "data": 
+        [
+            {   
+            "operation": "scale",
+            "kX": 2,
+            "kY": 1,
+            "centerX": 0.0,
+            "centerY": 0.0
+            },
+            {   
+            "operation": "move",
+            "dX": 2.0,
+            "dY": 0
+            }
+        ]
+    },
+    {
+        "name": "test_3",
+        "desc": "Кузнечик лёг спать",
+        "data": 
+            [
+                {   
+                "operation": "rotate",
+                "phi": 90,
+                "centerX": 0.0,
+                "centerY": 0.0
+                },
+                {   
+                "operation": "move",
+                "dX": 0,
+                "dY": 5
+                }
+            ]
+        }
+]

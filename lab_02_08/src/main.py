@@ -1,19 +1,33 @@
 import consts
 from sys import argv
-from PyQt5.QtGui import QFont, QRegExpValidator, QVector2D
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel, QMessageBox, \
-    QLineEdit, QMenuBar, QMainWindow, QAction, QGraphicsView, QGraphicsScene
+from PyQt5.QtGui import QFont, QRegExpValidator
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QPushButton,
+    QGridLayout,
+    QLabel,
+    QMessageBox,
+    QLineEdit,
+    QMenuBar,
+    QMainWindow,
+    QAction,
+    QGraphicsView,
+    QGraphicsScene,
+)
 from PyQt5.QtCore import QRegExp
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.patches import Ellipse
 from grasshopper import Grasshopper
 from math import acos, degrees
+from geom import Point
 
-OX = QVector2D(1, 0)
+OX = Point(1, 0)
 NEUTRAL_MOVE = 0
 NEUTRAL_SCALE = 1
 FORBIDDEN_STR = "-"
+
 
 class Main(QMainWindow):
     def __init__(self) -> None:
@@ -23,7 +37,7 @@ class Main(QMainWindow):
 
     def init_ui(self) -> None:
         self.resize(*consts.SCREEN_START_SIZE)
-        self.setWindowTitle('Задача №2')
+        self.setWindowTitle("Задача №2")
         self.setMinimumSize(*consts.SCREEN_START_SIZE)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
@@ -40,7 +54,7 @@ class Main(QMainWindow):
         self.msgBox.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.ui_layout()
-        self.connecter()  
+        self.connecter()
 
     def ui_labels(self) -> None:
         self.l_center = QLabel("Центр преобразования:")
@@ -54,8 +68,19 @@ class Main(QMainWindow):
         self.l_dx = QLabel("dX:")
         self.l_dy = QLabel("dY:")
         self.l_phi = QLabel("φ (°):")
-        for label in (self.l_center, self.l_scale, self.l_move, self.l_rotate, self.l_x, 
-                      self.l_y, self.l_kx, self.l_ky, self.l_dx, self.l_dy, self.l_phi):
+        for label in (
+            self.l_center,
+            self.l_scale,
+            self.l_move,
+            self.l_rotate,
+            self.l_x,
+            self.l_y,
+            self.l_kx,
+            self.l_ky,
+            self.l_dx,
+            self.l_dy,
+            self.l_phi,
+        ):
             label.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
     def ui_graph(self) -> None:
@@ -66,7 +91,7 @@ class Main(QMainWindow):
         self.model = Figure()
 
     def ui_line_edits(self) -> None:
-        validator_float = QRegExpValidator(QRegExp('^[+-]?[0-9][0-9]*[.]?[0-9]*$'))
+        validator_float = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*[.]?[0-9]*$"))
         self.le_x = QLineEdit()
         self.le_y = QLineEdit()
         self.le_kx = QLineEdit()
@@ -74,7 +99,15 @@ class Main(QMainWindow):
         self.le_dx = QLineEdit()
         self.le_dy = QLineEdit()
         self.le_phi = QLineEdit()
-        for le in (self.le_x, self.le_y, self.le_kx, self.le_ky, self.le_dx, self.le_dy, self.le_phi):
+        for le in (
+            self.le_x,
+            self.le_y,
+            self.le_kx,
+            self.le_ky,
+            self.le_dx,
+            self.le_dy,
+            self.le_phi,
+        ):
             le.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
             le.setValidator(validator_float)
 
@@ -131,11 +164,13 @@ class Main(QMainWindow):
         if not (self.le_x.text() and self.le_y.text()):
             if self.le_kx.text() or self.le_ky.text() or self.le_phi.text():
                 self.msgBox.setWindowTitle("Инфо")
-                self.msgBox.setText("Для масштабирования и/или поворота необходимо задать центр преобразования")
+                self.msgBox.setText(
+                    "Для масштабирования и/или поворота необходимо задать центр преобразования"
+                )
                 self.msgBox.show()
                 return
         else:
-            center = QVector2D(float(self.le_x.text()), float(self.le_y.text()))
+            center = Point(float(self.le_x.text()), float(self.le_y.text()))
         if self.le_is_valid():
             kx = ky = NEUTRAL_SCALE
             if self.le_kx.text():
@@ -155,7 +190,7 @@ class Main(QMainWindow):
                 self.picture.rotate(float(self.le_phi.text()), center)
             self.draw_picture()
 
-    def draw_picture(self) -> None:
+    def draw_picture(self, filename: str | None = None) -> None:
         self.scene.clear()
         self.model.clear()
         self.plot = self.model.gca()
@@ -169,23 +204,29 @@ class Main(QMainWindow):
                 self.draw_ellipse(pts)
             elif type == "triangle":
                 self.draw_polyline(pts + [pts[0]])
-        self.scene.addWidget(FigureCanvas(self.model)) 
+        if filename:
+            self.model.savefig(filename)
+        self.scene.addWidget(FigureCanvas(self.model))
 
-    def draw_ellipse(self, pts: list[QVector2D]) -> None:
+    def draw_ellipse(self, pts: list[Point]) -> None:
         center_point, right_point, upper_point = pts
         axis = right_point - center_point
         k_ang = 1
         if axis.y() < 0:
             k_ang = -1
-        ellipse = Ellipse(xy=center_point,
-                            width= 2 * center_point.distanceToPoint(right_point), 
-                            height= 2 * center_point.distanceToPoint(upper_point), 
-                            angle= k_ang * degrees(acos(QVector2D.dotProduct(OX, axis) / axis.length() / OX.length())), 
-                            edgecolor=consts.COLOR, 
-                            fc='None', lw=consts.LINE_WIDTH)
+        ellipse = Ellipse(
+            xy=center_point,
+            width=2 * center_point.distanceToPoint(right_point),
+            height=2 * center_point.distanceToPoint(upper_point),
+            angle=k_ang
+            * degrees(acos(Point.dotProduct(OX, axis) / axis.length() / OX.length())),
+            edgecolor=consts.COLOR,
+            fc="None",
+            lw=consts.LINE_WIDTH,
+        )
         self.plot.add_patch(ellipse)
 
-    def draw_polyline(self, pts: list[QVector2D]) -> None:
+    def draw_polyline(self, pts: list[Point]) -> None:
         x, y = [], []
         for point in pts:
             x.append(point.x())
@@ -198,11 +239,19 @@ class Main(QMainWindow):
 
     def le_is_valid(self) -> bool:
         is_valid = True
-        for le in (self.le_x, self.le_y, self.le_kx, self.le_ky, self.le_dx, self.le_dy, self.le_phi):
+        for le in (
+            self.le_x,
+            self.le_y,
+            self.le_kx,
+            self.le_ky,
+            self.le_dx,
+            self.le_dy,
+            self.le_phi,
+        ):
             if le.text() == FORBIDDEN_STR and is_valid:
                 is_valid = False
                 self.msgBox.setWindowTitle("Инфо")
-                self.msgBox.setText(f"\"{FORBIDDEN_STR}\" не число")
+                self.msgBox.setText(f'"{FORBIDDEN_STR}" не число')
                 self.msgBox.show()
         return is_valid
 
@@ -213,22 +262,24 @@ class Main(QMainWindow):
 
     def show_task(self) -> None:
         self.msgBox.setWindowTitle("Условие задачи")
-        self.msgBox.setText("8. Нарисовать кузнечика, затем осуществить его перенос, масштабирование и поворот")
+        self.msgBox.setText(
+            "8. Нарисовать кузнечика, затем осуществить его перенос, масштабирование и поворот"
+        )
         self.msgBox.show()
 
     def show_instruction(self) -> None:
         self.msgBox.setWindowTitle("Помощь")
-        self.msgBox.setText("Для выполнения преобразований необходимо задать параметры вещественными числами" +
-                            "(если не задать какой-либо параметр, то будет использовано нейтральное значение)" + 
-                            "и нажать на кнопку \"Построить решение\".\n\n" +
-                            "Для возврата к исходной фигуре необходимо нажать на кнопку \"Сбросить всё\"")
+        self.msgBox.setText(
+            "Для выполнения преобразований необходимо задать параметры вещественными числами"
+            + "(если не задать какой-либо параметр, то будет использовано нейтральное значение)"
+            + 'и нажать на кнопку "Построить решение".\n\n'
+            + 'Для возврата к исходной фигуре необходимо нажать на кнопку "Сбросить всё"'
+        )
         self.msgBox.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(argv)
-
     window = Main()
     window.show()
-
     exit(app.exec_())
