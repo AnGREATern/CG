@@ -2,7 +2,7 @@ import consts
 from line_window import LineWindow
 from spectrum_window import SpectrumWindow
 from sys import argv
-from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtGui import QFont, QColor, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -16,15 +16,14 @@ from PyQt5.QtWidgets import (
     QGraphicsScene,
     QColorDialog,
 )
-from matplotlib.pyplot import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtCore import QSize
 
-SCREEN_START_SIZE = (1100, 850)
+SCREEN_START_SIZE = (1200, 850)
+FIGURE_SIZE = (1180, 584)
 GRAPH_LOCATION = (0, 0)
-FIGURE_SIZE = (9, 5)
-PB_RUN1_LOCATION = (7, 0)
-PB_RUN_LOCATION = (8, 0)
-PB_RUN2_LOCATION = (9, 0)
+PB_PRINT_SPECTRUM_LOCATION = (7, 0)
+PB_PRINT_LINE_LOCATION = (8, 0)
+PB_EDIT_BACKGROUND_LOCATION = (9, 0)
 PB_RESET_LOCATION = (10, 0)
 
 
@@ -42,7 +41,7 @@ class Main(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.col_dlg = QColorDialog(self)
-        self.col_dlg.setCurrentColor(QColor(consts.BACKGROUND_COLOR_DEFAULT))
+        self.col_dlg.setCurrentColor(QColor(*consts.BACK_COLOR_DEFAULT))
 
         self.ui_graph()
         self.ui_buttons()
@@ -57,13 +56,17 @@ class Main(QMainWindow):
         self.connecter()
 
     def ui_graph(self) -> None:
-        self.graph = QGraphicsView()
-        self.graph.setMinimumWidth(consts.GRAPH_MINIMUM_WIDTH)
         self.scene = QGraphicsScene()
-        self.graph.setScene(self.scene)
-        self.model = Figure(FIGURE_SIZE)
-        self.graph_set_settings()
-        self.scene.addWidget(FigureCanvas(self.model))
+        self.graph = QGraphicsView(self.scene)
+        self.back_pix = QPixmap(QSize(*FIGURE_SIZE))
+        self.front_pix = QPixmap(QSize(*FIGURE_SIZE))
+        self.back_img = QImage(QSize(*FIGURE_SIZE), QImage.Format_ARGB32)
+        self.back_img.fill(QColor(*consts.BACK_COLOR_DEFAULT))
+        self.back_pix.convertFromImage(self.back_img)
+        self.front_img = QImage(QSize(*FIGURE_SIZE), QImage.Format_ARGB32)
+        self.front_img.fill(QColor(*consts.FRONT_COLOR_DEFAULT))
+        self.front_pix.convertFromImage(self.front_img)
+        self.reset()
 
     def ui_menu_bar(self) -> None:
         self.mb = QMenuBar(self)
@@ -100,9 +103,9 @@ class Main(QMainWindow):
     def ui_layout(self) -> None:
         self.layout = QGridLayout(self.main_widget)
         self.layout.addWidget(self.graph, *GRAPH_LOCATION)
-        self.layout.addWidget(self.pb_print_spectrum, *PB_RUN1_LOCATION)
-        self.layout.addWidget(self.pb_print_line, *PB_RUN_LOCATION)
-        self.layout.addWidget(self.pb_edit_background, *PB_RUN2_LOCATION)
+        self.layout.addWidget(self.pb_print_spectrum, *PB_PRINT_SPECTRUM_LOCATION)
+        self.layout.addWidget(self.pb_print_line, *PB_PRINT_LINE_LOCATION)
+        self.layout.addWidget(self.pb_edit_background, *PB_EDIT_BACKGROUND_LOCATION)
         self.layout.addWidget(self.pb_reset, *PB_RESET_LOCATION)
 
     def connecter(self) -> None:
@@ -115,21 +118,12 @@ class Main(QMainWindow):
         self.pb_reset.clicked.connect(self.reset)
 
     def reset(self) -> None:
-        self.col_dlg.setCurrentColor(QColor(consts.BACKGROUND_COLOR_DEFAULT))
-        self.graph_set_settings()
-        self.scene.addWidget(FigureCanvas(self.model))
-
-    def graph_set_settings(self) -> None:
         self.scene.clear()
-        self.model.clear()
-        self.plot = self.model.gca()
-        self.plot.grid(True)
-        self.plot.set_xlim(*consts.FIELD_LIM)
-        self.plot.set_ylim(*consts.FIELD_LIM)
-        self.plot.set_facecolor(self.col_dlg.currentColor().name())
+        self.front_img.fill(QColor(*consts.FRONT_COLOR_DEFAULT))
+        self.scene.addPixmap(self.back_pix)
 
     def open_spectrum_window(self) -> None:
-        self.sw = SpectrumWindow()
+        self.sw = SpectrumWindow(self)
         self.sw.show()
 
     def open_line_window(self) -> None:
@@ -138,8 +132,23 @@ class Main(QMainWindow):
 
     def edit_background_color(self) -> None:
         self.col_dlg.exec()
-        self.plot.set_facecolor(self.col_dlg.currentColor().name())
-        self.scene.addWidget(FigureCanvas(self.model))
+        self.back_img.fill(self.col_dlg.currentColor())
+        self.back_pix.convertFromImage(self.back_img)
+        self.scene.addPixmap(self.back_pix)
+        self.scene.addPixmap(self.front_pix)
+
+    def output_foreground(self) -> None:
+        self.scene.clear()
+        self.scene.addPixmap(self.back_pix)
+        self.front_pix.convertFromImage(self.front_img)
+        self.scene.addPixmap(self.front_pix)
+        
+    def draw_picture(self, filename: str) -> None:
+        image = QImage(self.scene.sceneRect().size().toSize(), QImage.Format_ARGB32)
+        painter = QPainter(image)
+        self.scene.render(painter)
+        painter.end()
+        image.save(filename + ".png")
 
     def show_about(self) -> None:
         self.msg_box.setWindowTitle("Об авторе")

@@ -7,7 +7,7 @@ from algorithms import (
     bresenham_classic_impl,
     wu_impl,
 )
-from PyQt5.QtGui import QFont, QRegExpValidator, QColor, QVector2D
+from PyQt5.QtGui import QFont, QRegExpValidator, QColor
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -19,10 +19,10 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QColorDialog,
 )
-from PyQt5.QtCore import QRegExp
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtCore import QRegExp, QPoint
 
 FORBIDDEN_STR = "-"
+LINE_COLOR_DEFAULT = "#000000"
 SCREEN_START_SIZE = (660, 550)
 L_BUILD_LOCATION = (0, 0)
 CB_BUILD_LOCATION = (0, 1, 1, 2)
@@ -73,7 +73,7 @@ class LineWindow(QMainWindow):
         self.msg_box.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.col_dlg = QColorDialog(self)
-        self.col_dlg.setCurrentColor(QColor(consts.LINE_COLOR_DEFAULT))
+        self.col_dlg.setCurrentColor(QColor(LINE_COLOR_DEFAULT))
 
         self.ui_layout()
         self.connecter()
@@ -84,7 +84,7 @@ class LineWindow(QMainWindow):
         self.cb_build.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
     def ui_line_edits(self) -> None:
-        validator_float = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*[.]?[0-9]*$"))
+        validator_int = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*$"))
         self.le_x_start = QLineEdit()
         self.le_y_start = QLineEdit()
         self.le_x_end = QLineEdit()
@@ -96,12 +96,12 @@ class LineWindow(QMainWindow):
             self.le_y_end,
         ):
             le.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
-            le.setValidator(validator_float)
+            le.setValidator(validator_int)
 
     def ui_labels(self) -> None:
         self.l_build = QLabel("Алгоритм построения:")
         self.l_line_color = QLabel("Цвет линии: ")
-        self.l_line_current_color = QLabel(consts.LINE_COLOR_DEFAULT)
+        self.l_line_current_color = QLabel(LINE_COLOR_DEFAULT)
         self.l_x_start = QLabel("X начальное: ")
         self.l_x_end = QLabel("X конечное: ")
         self.l_y_start = QLabel("Y начальное: ")
@@ -152,14 +152,15 @@ class LineWindow(QMainWindow):
     def make_line(self) -> None:
         if not self.le_is_valid():
             return
-        start_point = QVector2D(
-            float(self.le_x_start.text()), float(self.le_y_start.text())
-        )
-        end_point = QVector2D(float(self.le_x_end.text()), float(self.le_y_end.text()))
+        start_point = QPoint(int(self.le_x_start.text()), int(self.le_y_start.text()))
+        end_point = QPoint(int(self.le_x_end.text()), int(self.le_y_end.text()))
         self.algs[self.cb_build.currentText()](
-            self.parent.plot, start_point, end_point, self.col_dlg.currentColor().name()
+            self.parent.front_img,
+            start_point,
+            end_point,
+            self.col_dlg.currentColor(),
         )
-        self.parent.scene.addWidget(FigureCanvas(self.parent.model))
+        self.parent.output_foreground()
         self.close()
 
     def le_is_valid(self) -> bool:
