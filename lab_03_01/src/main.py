@@ -142,7 +142,7 @@ class Main(QMainWindow):
         self.scene.addPixmap(self.back_pix)
         self.front_pix.convertFromImage(self.front_img)
         self.scene.addPixmap(self.front_pix)
-        
+
     def draw_picture(self, filename: str) -> None:
         image = QImage(self.scene.sceneRect().size().toSize(), QImage.Format_ARGB32)
         painter = QPainter(image)

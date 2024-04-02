@@ -6,7 +6,7 @@ from algorithms import (
     bresenham_int_impl,
     bresenham_classic_impl,
     wu_impl,
-    rotate
+    rotate,
 )
 from PyQt5.QtGui import QFont, QRegExpValidator, QColor
 from PyQt5.QtWidgets import (
@@ -20,16 +20,8 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QColorDialog,
 )
-from PyQt5.QtCore import QRegExp, QPoint, QPointF
+from PyQt5.QtCore import QRegExp, QPoint
 
-FORBIDDEN_STR = "-"
-SCREEN_START_SIZE = (660, 550)
-LINE_COLOR_DEFAULT = "#000000"
-L_BUILD_LOCATION = (0, 0)
-CB_BUILD_LOCATION = (0, 1, 1, 2)
-L_LINE_COLOR_LOCATION = (1, 0)
-L_LINE_CURRENT_COLOR_LOCATION = (1, 1)
-PB_EDIT_COLOR_LOCATION = (1, 2)
 L_X_CENTER_LOCATION = (2, 0)
 LE_X_CENTER_LOCATION = (2, 1, 1, 2)
 L_Y_CENTER_LOCATION = (3, 0)
@@ -38,7 +30,6 @@ L_STEP_LOCATION = (4, 0)
 LE_STEP_LOCATION = (4, 1, 1, 2)
 L_LENGTH_LOCATION = (5, 0)
 LE_LENGTH_LOCATION = (5, 1, 1, 2)
-PB_PRINT_LINE_LOCATION = (6, 0, 1, 3)
 
 
 class SpectrumWindow(QMainWindow):
@@ -56,10 +47,10 @@ class SpectrumWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.resize(*SCREEN_START_SIZE)
+        self.resize(*consts.SCREEN_START_SIZE)
         self.setWindowTitle("Построение спектра")
-        self.setMinimumSize(*SCREEN_START_SIZE)
-        self.setMaximumSize(*SCREEN_START_SIZE)
+        self.setMinimumSize(*consts.SCREEN_START_SIZE)
+        self.setMaximumSize(*consts.SCREEN_START_SIZE)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
@@ -74,7 +65,7 @@ class SpectrumWindow(QMainWindow):
         self.msg_box.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.col_dlg = QColorDialog(self)
-        self.col_dlg.setCurrentColor(QColor(LINE_COLOR_DEFAULT))
+        self.col_dlg.setCurrentColor(QColor(consts.LINE_COLOR_DEFAULT))
 
         self.ui_layout()
         self.connecter()
@@ -106,7 +97,7 @@ class SpectrumWindow(QMainWindow):
     def ui_labels(self) -> None:
         self.l_build = QLabel("Алгоритм построения:")
         self.l_line_color = QLabel("Цвет линий: ")
-        self.l_line_current_color = QLabel(LINE_COLOR_DEFAULT)
+        self.l_line_current_color = QLabel(consts.LINE_COLOR_DEFAULT)
         self.l_x_center = QLabel("X центра: ")
         self.l_step = QLabel("Шаг (°): ")
         self.l_y_center = QLabel("Y центра: ")
@@ -131,11 +122,11 @@ class SpectrumWindow(QMainWindow):
 
     def ui_layout(self) -> None:
         self.layout = QGridLayout(self.main_widget)
-        self.layout.addWidget(self.l_build, *L_BUILD_LOCATION)
-        self.layout.addWidget(self.cb_build, *CB_BUILD_LOCATION)
-        self.layout.addWidget(self.l_line_color, *L_LINE_COLOR_LOCATION)
-        self.layout.addWidget(self.l_line_current_color, *L_LINE_CURRENT_COLOR_LOCATION)
-        self.layout.addWidget(self.pb_edit_color, *PB_EDIT_COLOR_LOCATION)
+        self.layout.addWidget(self.l_build, *consts.L_BUILD_LOCATION)
+        self.layout.addWidget(self.cb_build, *consts.CB_BUILD_LOCATION)
+        self.layout.addWidget(self.l_line_color, *consts.L_LINE_COLOR_LOCATION)
+        self.layout.addWidget(self.l_line_current_color, *consts.L_LINE_CURRENT_COLOR_LOCATION)
+        self.layout.addWidget(self.pb_edit_color, *consts.PB_EDIT_COLOR_LOCATION)
         self.layout.addWidget(self.l_x_center, *L_X_CENTER_LOCATION)
         self.layout.addWidget(self.l_y_center, *L_Y_CENTER_LOCATION)
         self.layout.addWidget(self.le_x_center, *LE_X_CENTER_LOCATION)
@@ -144,7 +135,7 @@ class SpectrumWindow(QMainWindow):
         self.layout.addWidget(self.l_length, *L_LENGTH_LOCATION)
         self.layout.addWidget(self.le_step, *LE_STEP_LOCATION)
         self.layout.addWidget(self.le_length, *LE_LENGTH_LOCATION)
-        self.layout.addWidget(self.pb_print_spectrum, *PB_PRINT_LINE_LOCATION)
+        self.layout.addWidget(self.pb_print_spectrum, *consts.PB_PRINT_LINE_LOCATION)
 
     def connecter(self) -> None:
         self.pb_print_spectrum.clicked.connect(self.make_spectrum)
@@ -153,7 +144,7 @@ class SpectrumWindow(QMainWindow):
     def edit_color(self):
         self.col_dlg.exec()
         self.l_line_current_color.setText(self.col_dlg.currentColor().name())
-        
+
     def make_spectrum(self) -> None:
         if not self.le_is_valid():
             return
@@ -181,11 +172,11 @@ class SpectrumWindow(QMainWindow):
             self.le_step,
             self.le_length,
         ):
-            if (not le.text() or le.text() == FORBIDDEN_STR) and is_valid:
+            if (not le.text() or le.text() == consts.FORBIDDEN_STR) and is_valid:
                 is_valid = False
                 self.msg_box.setWindowTitle("Инфо")
                 if le.text():
-                    self.msg_box.setText(f'"{FORBIDDEN_STR}" не число')
+                    self.msg_box.setText(f'"{consts.FORBIDDEN_STR}" не число')
                 else:
                     self.msg_box.setText("Необходимо заполнить все поля")
                 self.msg_box.show()

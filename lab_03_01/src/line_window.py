@@ -21,14 +21,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QRegExp, QPoint
 
-FORBIDDEN_STR = "-"
-LINE_COLOR_DEFAULT = "#000000"
-SCREEN_START_SIZE = (660, 550)
-L_BUILD_LOCATION = (0, 0)
-CB_BUILD_LOCATION = (0, 1, 1, 2)
-L_LINE_COLOR_LOCATION = (1, 0)
-L_LINE_CURRENT_COLOR_LOCATION = (1, 1)
-PB_EDIT_COLOR_LOCATION = (1, 2)
 L_X_START_LOCATION = (2, 0)
 LE_X_START_LOCATION = (2, 1, 1, 2)
 L_Y_START_LOCATION = (3, 0)
@@ -37,7 +29,6 @@ L_X_END_LOCATION = (4, 0)
 LE_X_END_LOCATION = (4, 1, 1, 2)
 L_Y_END_LOCATION = (5, 0)
 LE_Y_END_LOCATION = (5, 1, 1, 2)
-PB_PRINT_LINE_LOCATION = (6, 0, 1, 3)
 
 
 class LineWindow(QMainWindow):
@@ -55,10 +46,10 @@ class LineWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.resize(*SCREEN_START_SIZE)
+        self.resize(*consts.SCREEN_START_SIZE)
         self.setWindowTitle("Построение отрезка")
-        self.setMinimumSize(*SCREEN_START_SIZE)
-        self.setMaximumSize(*SCREEN_START_SIZE)
+        self.setMinimumSize(*consts.SCREEN_START_SIZE)
+        self.setMaximumSize(*consts.SCREEN_START_SIZE)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
@@ -73,7 +64,7 @@ class LineWindow(QMainWindow):
         self.msg_box.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
 
         self.col_dlg = QColorDialog(self)
-        self.col_dlg.setCurrentColor(QColor(LINE_COLOR_DEFAULT))
+        self.col_dlg.setCurrentColor(QColor(consts.LINE_COLOR_DEFAULT))
 
         self.ui_layout()
         self.connecter()
@@ -101,7 +92,7 @@ class LineWindow(QMainWindow):
     def ui_labels(self) -> None:
         self.l_build = QLabel("Алгоритм построения:")
         self.l_line_color = QLabel("Цвет линии: ")
-        self.l_line_current_color = QLabel(LINE_COLOR_DEFAULT)
+        self.l_line_current_color = QLabel(consts.LINE_COLOR_DEFAULT)
         self.l_x_start = QLabel("X начальное: ")
         self.l_x_end = QLabel("X конечное: ")
         self.l_y_start = QLabel("Y начальное: ")
@@ -126,11 +117,11 @@ class LineWindow(QMainWindow):
 
     def ui_layout(self) -> None:
         self.layout = QGridLayout(self.main_widget)
-        self.layout.addWidget(self.l_build, *L_BUILD_LOCATION)
-        self.layout.addWidget(self.cb_build, *CB_BUILD_LOCATION)
-        self.layout.addWidget(self.l_line_color, *L_LINE_COLOR_LOCATION)
-        self.layout.addWidget(self.l_line_current_color, *L_LINE_CURRENT_COLOR_LOCATION)
-        self.layout.addWidget(self.pb_edit_color, *PB_EDIT_COLOR_LOCATION)
+        self.layout.addWidget(self.l_build, *consts.L_BUILD_LOCATION)
+        self.layout.addWidget(self.cb_build, *consts.CB_BUILD_LOCATION)
+        self.layout.addWidget(self.l_line_color, *consts.L_LINE_COLOR_LOCATION)
+        self.layout.addWidget(self.l_line_current_color, *consts.L_LINE_CURRENT_COLOR_LOCATION)
+        self.layout.addWidget(self.pb_edit_color, *consts.PB_EDIT_COLOR_LOCATION)
         self.layout.addWidget(self.l_x_start, *L_X_START_LOCATION)
         self.layout.addWidget(self.l_y_start, *L_Y_START_LOCATION)
         self.layout.addWidget(self.le_x_start, *LE_X_START_LOCATION)
@@ -139,7 +130,7 @@ class LineWindow(QMainWindow):
         self.layout.addWidget(self.l_y_end, *L_Y_END_LOCATION)
         self.layout.addWidget(self.le_x_end, *LE_X_END_LOCATION)
         self.layout.addWidget(self.le_y_end, *LE_Y_END_LOCATION)
-        self.layout.addWidget(self.pb_print_line, *PB_PRINT_LINE_LOCATION)
+        self.layout.addWidget(self.pb_print_line, *consts.PB_PRINT_LINE_LOCATION)
 
     def connecter(self) -> None:
         self.pb_print_line.clicked.connect(self.make_line)
@@ -171,11 +162,11 @@ class LineWindow(QMainWindow):
             self.le_x_end,
             self.le_y_end,
         ):
-            if (not le.text() or le.text() == FORBIDDEN_STR) and is_valid:
+            if (not le.text() or le.text() == consts.FORBIDDEN_STR) and is_valid:
                 is_valid = False
                 self.msg_box.setWindowTitle("Инфо")
                 if le.text():
-                    self.msg_box.setText(f'"{FORBIDDEN_STR}" не число')
+                    self.msg_box.setText(f'"{consts.FORBIDDEN_STR}" не число')
                 else:
                     self.msg_box.setText("Необходимо заполнить все поля")
                 self.msg_box.show()

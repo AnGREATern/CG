@@ -4,6 +4,9 @@ from consts import EPS
 from math import radians, cos, sin, floor
 
 
+MAX_BRIGHTNESS = 256
+
+
 def rotate(point: QPoint, center: QPoint, phi: float):
     point -= center
     phi = radians(phi)
@@ -12,9 +15,11 @@ def rotate(point: QPoint, center: QPoint, phi: float):
     point.setX(round(x1))
     point.setY(round(y1))
     point += center
-    
 
-def plot_pixel(plot: QImage, point: QPoint | QPointF, color: QColor, alpha: float = 1.0):
+
+def plot_pixel(
+    plot: QImage, point: QPoint | QPointF, color: QColor, alpha: float = 1.0
+):
     pix_p = QPoint(round(point.x()), round(point.y()))
     if plot.rect().contains(pix_p):
         if 0 <= alpha <= 1:
@@ -39,9 +44,9 @@ def dda_impl(
     else:
         cur = QPointF(start_point)
         d = end_point - start_point
-        l = max(abs(d.x()), abs(d.y()))
-        d = QPointF(d.x() / l, d.y() / l)
-        for _ in range(l):
+        length = max(abs(d.x()), abs(d.y()))
+        d = QPointF(d.x() / length, d.y() / length)
+        for _ in range(length):
             plot_pixel(plot, cur, color)
             cur += d
 
@@ -126,7 +131,7 @@ def bresenham_classic_impl(
     if start_point == end_point:
         plot.setPixel(start_point, color.rgb())
     else:
-        i = 256
+        i = MAX_BRIGHTNESS
         cur = QPointF(start_point)
         d = end_point - start_point
         sp = QPoint(sign(d.x()), sign(d.y()))
@@ -153,10 +158,22 @@ def bresenham_classic_impl(
                 e -= w
 
 
+def wu_basic_plot(
+    plot: QImage, color: QColor, point: QPointF, gradient: float
+) -> tuple[QPointF, QPointF]:
+    pend = QPointF()
+    pend.setX(round(point.x()))
+    pend.setY(point.y() + gradient * (pend.x() - point.x()))
+    xgap = -point.x() - 0.5 + int(point.x() + 0.5)
+    pxl1 = QPointF(pend.x(), floor(pend.y()))
+    plot_pixel(plot, pxl1, color, (1 - pend.y() + int(pend.y())) * xgap)
+    plot_pixel(plot, pxl1 + QPointF(0, 1), color, (pend.y() - int(pend.y())) * xgap)
+    return pend, pxl1
+
+
 def wu_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
 ) -> None:
-    pass
     d = end_point - start_point
     cur = start_point
     is_changed = abs(d.x()) < abs(d.y())
@@ -167,24 +184,9 @@ def wu_impl(
     if end_point.x() < cur.x():
         cur, end_point = end_point, cur
     gradient = d.y() / d.x()
-    
-    pend = QPointF()
-    pend.setX(round(cur.x()))
-    pend.setY(cur.y() + gradient * (pend.x() - cur.x()))
-    xgap = -cur.x() - 0.5 + int(cur.x() + 0.5)
-    pxl1 = QPointF(pend.x(), floor(pend.y()))
-    plot_pixel(plot, pxl1, color, (1 - pend.y() + int(pend.y())) * xgap)
-    plot_pixel(plot, pxl1 + QPointF(0, 1), color, (pend.y() - int(pend.y())) * xgap)
+    pend, pxl1 = wu_basic_plot(plot, color, cur, gradient)
     intery = pend.y() + gradient
-
-    pend = QPointF()
-    pend.setX(round(end_point.x()))
-    pend.setY(end_point.y() + gradient * (pend.x() - end_point.x()))
-    xgap = -end_point.x() - 0.5 + int(end_point.x() + 0.5)
-    pxl2 = QPointF(pend.x(), floor(pend.y()))
-    plot_pixel(plot, pxl2, color, (1 - pend.y() + int(pend.y())) * xgap)
-    plot_pixel(plot, pxl2 + QPointF(0, 1), color, (pend.y() - int(pend.y())) * xgap)
-    
+    pend, pxl2 = wu_basic_plot(plot, color, end_point, gradient)
     for x in range(round(pxl1.x()) + 1, round(pxl2.x())):
         if not is_changed:
             plot_pixel(plot, QPointF(x, floor(intery)), color, 1 - intery + int(intery))
