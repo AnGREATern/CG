@@ -1,6 +1,5 @@
 import consts
 from line_window import LineWindow
-from spectrum_window import SpectrumWindow
 from sys import argv
 from PyQt5.QtGui import QFont, QColor, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import (
@@ -123,19 +122,18 @@ class Main(QMainWindow):
         self.scene.addPixmap(self.back_pix)
 
     def open_spectrum_window(self) -> None:
-        self.sw = SpectrumWindow(self)
-        self.sw.show()
+        self.lw = LineWindow(self, True)
+        self.lw.show()
 
     def open_line_window(self) -> None:
-        self.lw = LineWindow(self)
+        self.lw = LineWindow(self, False)
         self.lw.show()
 
     def edit_background_color(self) -> None:
         self.col_dlg.exec()
         self.back_img.fill(self.col_dlg.currentColor())
         self.back_pix.convertFromImage(self.back_img)
-        self.scene.addPixmap(self.back_pix)
-        self.scene.addPixmap(self.front_pix)
+        self.output_foreground()
 
     def output_foreground(self) -> None:
         self.scene.clear()

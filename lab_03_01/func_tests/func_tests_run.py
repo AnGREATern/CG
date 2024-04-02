@@ -7,7 +7,6 @@ from json import load
 path.append("./src")
 from main import Main
 from line_window import LineWindow
-from spectrum_window import SpectrumWindow
 
 app = QApplication(argv)
 with open("./func_tests/func_tests.json") as input_file:
@@ -18,15 +17,15 @@ with open("./func_tests/func_tests.json") as input_file:
         start_time = datetime.now()
         for elem in data["data"]:
             if elem["operation"] == "spectrum":
-                draw_win = SpectrumWindow(graph_win)
-                draw_win.le_x_center.setText(str(elem["centerX"]))
-                draw_win.le_y_center.setText(str(elem["centerY"]))
-                draw_win.le_step.setText(str(elem["step"]))
-                draw_win.le_length.setText(str(elem["length"]))
+                draw_win = LineWindow(graph_win, True)
+                draw_win.le_x_start.setText(str(elem["centerX"]))
+                draw_win.le_y_start.setText(str(elem["centerY"]))
+                draw_win.le_x_end.setText(str(elem["step"]))
+                draw_win.le_y_end.setText(str(elem["length"]))
                 draw_win.cb_build.setCurrentText(elem["algorithm"])
                 draw_win.make_spectrum()
             else:
-                draw_win = LineWindow(graph_win)
+                draw_win = LineWindow(graph_win, False)
                 draw_win.le_x_start.setText(str(elem["startX"]))
                 draw_win.le_y_start.setText(str(elem["startY"]))
                 draw_win.le_x_end.setText(str(elem["endX"]))
