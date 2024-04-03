@@ -14,7 +14,7 @@ with open("./func_tests/func_tests.json") as input_file:
     for data in sr:
         graph_win = Main()
         graph_win.ui_graph()
-        start_time = datetime.now()
+        total_time = 0
         for elem in data["data"]:
             if elem["operation"] == "spectrum":
                 draw_win = LineWindow(graph_win, True)
@@ -23,6 +23,7 @@ with open("./func_tests/func_tests.json") as input_file:
                 draw_win.le_x_end.setText(str(elem["step"]))
                 draw_win.le_y_end.setText(str(elem["length"]))
                 draw_win.cb_build.setCurrentText(elem["algorithm"])
+                start_time = datetime.now()
                 draw_win.make_spectrum()
             else:
                 draw_win = LineWindow(graph_win, False)
@@ -31,8 +32,9 @@ with open("./func_tests/func_tests.json") as input_file:
                 draw_win.le_x_end.setText(str(elem["endX"]))
                 draw_win.le_y_end.setText(str(elem["endY"]))
                 draw_win.cb_build.setCurrentText(elem["algorithm"])
+                start_time = datetime.now()
                 draw_win.make_line()
+            total_time += (datetime.now() - start_time).microseconds // 1000
         graph_win.draw_picture("results/" + data["name"])
         with open("temp", "a") as output_file:
-            dt = (datetime.now() - start_time).microseconds // 1000
-            output_file.write(data["name"] + "\t" + str(dt) + "\n")
+            output_file.write(data["name"] + "\t" + str(total_time) + "\n")

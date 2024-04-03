@@ -7,7 +7,7 @@ from math import radians, cos, sin, floor
 MAX_BRIGHTNESS = 256
 
 
-def rotate(point: QPoint, center: QPoint, phi: float):
+def rotate(point: QPoint, center: QPoint, phi: float) -> None:
     point -= center
     phi = radians(phi)
     x1 = point.x() * cos(phi) - point.y() * sin(phi)
@@ -19,26 +19,33 @@ def rotate(point: QPoint, center: QPoint, phi: float):
 
 def plot_pixel(
     plot: QImage, point: QPoint | QPointF, color: QColor, alpha: float = 1.0
-):
+) -> QPoint:
     pix_p = QPoint(round(point.x()), round(point.y()))
     if plot.rect().contains(pix_p):
         if 0 <= alpha <= 1:
             color.setAlphaF(alpha)
         plot.setPixel(pix_p, color.rgba())
+    return pix_p
 
 
 def internal_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+) -> int:
     painter = QPainter(plot)
     painter.setPen(color)
     painter.drawLine(start_point.x(), start_point.y(), end_point.x(), end_point.y())
     painter.end()
 
 
+def is_step(point: QPoint) -> bool:
+    return sign(point.x()) != 0 and sign(point.y()) != 0
+
+
 def dda_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+) -> int:
+    cnt = 0
+    last_pix = start_point
     if start_point == end_point:
         plot.setPixel(start_point, color.rgb())
     else:
@@ -47,8 +54,11 @@ def dda_impl(
         length = max(abs(d.x()), abs(d.y()))
         d = QPointF(d.x() / length, d.y() / length)
         for _ in range(length):
-            plot_pixel(plot, cur, color)
+            new_pix = plot_pixel(plot, cur, color)
+            cnt += is_step(new_pix - last_pix)
+            last_pix = new_pix
             cur += d
+    return cnt
 
 
 def sign(x: int | float) -> int:
@@ -62,7 +72,7 @@ def sign(x: int | float) -> int:
 
 def bresenham_real_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+) -> int:
     if start_point == end_point:
         plot.setPixel(start_point, color.rgb())
     else:
@@ -91,11 +101,14 @@ def bresenham_real_impl(
                 else:
                     cur.setY(cur.y() + sp.y())
                 e += m
+    return min(
+        abs(end_point.x() - start_point.x()), abs(end_point.y() - start_point.y())
+    )
 
 
 def bresenham_int_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+) -> int:
     if start_point == end_point:
         plot.setPixel(start_point, color.rgb())
     else:
@@ -123,11 +136,16 @@ def bresenham_int_impl(
                 else:
                     cur.setY(cur.y() + sp.y())
                 e += 2 * d.y()
+    return min(
+        abs(end_point.x() - start_point.x()), abs(end_point.y() - start_point.y())
+    )
 
 
 def bresenham_classic_impl(
     plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+) -> int:
+    cnt = 0
+    last_pix = start_point
     if start_point == end_point:
         plot.setPixel(start_point, color.rgb())
     else:
@@ -145,7 +163,9 @@ def bresenham_classic_impl(
         w = i - m
         e = 0.5
         for _ in range(d.x() + 1):
-            plot_pixel(plot, cur, color, 1 - e / i + int(e / i))
+            new_pix = plot_pixel(plot, cur, color, 1 - e / i + int(e / i))
+            cnt += is_step(new_pix - last_pix)
+            last_pix = new_pix
             if e < w:
                 if is_changed:
                     cur.setY(cur.y() + sp.y())
@@ -156,6 +176,7 @@ def bresenham_classic_impl(
                 cur.setX(cur.x() + sp.x())
                 cur.setY(cur.y() + sp.y())
                 e -= w
+    return cnt
 
 
 def wu_basic_plot(
@@ -171,9 +192,9 @@ def wu_basic_plot(
     return pend, pxl1
 
 
-def wu_impl(
-    plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor
-) -> None:
+def wu_impl(plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor) -> int:
+    cnt = 0
+    last_pix = start_point
     d = end_point - start_point
     cur = start_point
     is_changed = abs(d.x()) < abs(d.y())
@@ -189,9 +210,30 @@ def wu_impl(
     pend, pxl2 = wu_basic_plot(plot, color, end_point, gradient)
     for x in range(round(pxl1.x()) + 1, round(pxl2.x())):
         if not is_changed:
-            plot_pixel(plot, QPointF(x, floor(intery)), color, 1 - intery + int(intery))
-            plot_pixel(plot, QPointF(x, floor(intery) + 1), color, intery - int(intery))
+            new_pix = plot_pixel(
+                plot, QPointF(x, floor(intery)), color, 1 - intery + int(intery)
+            )
+            if 1 - intery + int(intery) > EPS:
+                cnt += is_step(new_pix - last_pix)
+                last_pix = new_pix
+            new_pix = plot_pixel(
+                plot, QPointF(x, floor(intery) + 1), color, intery - int(intery)
+            )
+            if intery - int(intery) > EPS:
+                cnt += is_step(new_pix - last_pix)
+                last_pix = new_pix
         else:
-            plot_pixel(plot, QPointF(floor(intery), x), color, 1 - intery + int(intery))
-            plot_pixel(plot, QPointF(floor(intery) + 1, x), color, intery - int(intery))
+            new_pix = plot_pixel(
+                plot, QPointF(floor(intery), x), color, 1 - intery + int(intery)
+            )
+            if 1 - intery + int(intery) > EPS:
+                cnt += is_step(new_pix - last_pix)
+                last_pix = new_pix
+            new_pix = plot_pixel(
+                plot, QPointF(floor(intery) + 1, x), color, intery - int(intery)
+            )
+            if intery - int(intery) > EPS:
+                cnt += is_step(new_pix - last_pix)
+                last_pix = new_pix
         intery += gradient
+    return cnt

@@ -1,5 +1,6 @@
 import consts
 from line_window import LineWindow
+from histogram_window import HistogramWindow
 from sys import argv
 from PyQt5.QtGui import QFont, QColor, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import (
@@ -30,6 +31,8 @@ class Main(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.init_ui()
+        self.time_hist = HistogramWindow(True)
+        self.stepwise_hist = HistogramWindow(False)
 
     def init_ui(self) -> None:
         self.resize(*SCREEN_START_SIZE)
@@ -111,6 +114,8 @@ class Main(QMainWindow):
         self.about.triggered.connect(self.show_about)
         self.task.triggered.connect(self.show_task)
         self.instruction.triggered.connect(self.show_instruction)
+        self.time_comp.triggered.connect(self.show_time_comp)
+        self.stepwise_comp.triggered.connect(self.show_stepwise_comp)
         self.pb_print_spectrum.clicked.connect(self.open_spectrum_window)
         self.pb_print_line.clicked.connect(self.open_line_window)
         self.pb_edit_background.clicked.connect(self.edit_background_color)
@@ -147,6 +152,12 @@ class Main(QMainWindow):
         self.scene.render(painter)
         painter.end()
         image.save(filename + ".png")
+
+    def show_time_comp(self) -> None:
+        self.time_hist.show()
+
+    def show_stepwise_comp(self) -> None:
+        self.stepwise_hist.show()
 
     def show_about(self) -> None:
         self.msg_box.setWindowTitle("Об авторе")

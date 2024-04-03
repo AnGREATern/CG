@@ -6,7 +6,7 @@ from algorithms import (
     bresenham_int_impl,
     bresenham_classic_impl,
     wu_impl,
-    rotate
+    rotate,
 )
 from PyQt5.QtGui import QFont, QRegExpValidator, QColor
 from PyQt5.QtWidgets import (
@@ -179,7 +179,7 @@ class LineWindow(QMainWindow):
         )
         self.parent.output_foreground()
         self.close()
-        
+
     def make_spectrum(self) -> None:
         if not self.le_is_valid():
             return
