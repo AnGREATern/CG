@@ -1,0 +1,47 @@
+[
+    {
+    "name": "test_1",
+    "desc": "Спектр. Библиотечный алгоритм",
+    "data": 
+        [
+            {   
+            "algorithm": "Библиотечный",
+            "operation": "spectrum",
+            "centerX": 400,
+            "centerY": 400,
+            "length": 100,
+            "step": 30
+            }
+        ]
+    },
+    {
+    "name": "test_2",
+    "desc": "Спектр. Алгоритм Ву",
+    "data": 
+        [
+            {   
+            "algorithm": "Алгоритм Ву",
+            "operation": "spectrum",
+            "centerX": 400,
+            "centerY": 400,
+            "length": 90,
+            "step": 45
+            }
+        ]
+    },
+    {
+        "name": "test_3",
+        "desc": "Отрезок. Алгоритм Брезенхема с целочисленными данными",
+        "data": 
+            [
+                {   
+                "algorithm": "Алгоритм Брезенхема с целочисленными данными",
+                "operation": "line",
+                "startX": 1,
+                "startY": 1,
+                "endX": 200,
+                "endY": 27
+                }
+            ]
+        }
+]
