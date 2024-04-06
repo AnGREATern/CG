@@ -18,10 +18,10 @@ with open("./func_tests/func_tests.json") as input_file:
         for elem in data["data"]:
             if elem["operation"] == "spectrum":
                 draw_win = LineWindow(graph_win, True)
-                draw_win.le_x_start.setText(str(elem["centerX"]))
-                draw_win.le_y_start.setText(str(elem["centerY"]))
-                draw_win.le_x_end.setText(str(elem["step"]))
-                draw_win.le_y_end.setText(str(elem["length"]))
+                draw_win.le_x_center.setText(str(elem["centerX"]))
+                draw_win.le_y_center.setText(str(elem["centerY"]))
+                draw_win.le_step.setText(str(elem["step"]))
+                draw_win.le_length.setText(str(elem["length"]))
                 draw_win.cb_build.setCurrentText(elem["algorithm"])
                 start_time = datetime.now()
                 draw_win.make_spectrum()

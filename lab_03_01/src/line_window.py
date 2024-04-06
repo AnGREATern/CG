@@ -90,16 +90,29 @@ class LineWindow(QMainWindow):
 
     def ui_line_edits(self) -> None:
         validator_int = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*$"))
-        self.le_x_start = QLineEdit()
-        self.le_y_start = QLineEdit()
-        self.le_x_end = QLineEdit()
-        self.le_y_end = QLineEdit()
-        for le in (
-            self.le_x_start,
-            self.le_y_start,
-            self.le_x_end,
-            self.le_y_end,
-        ):
+        if self.is_spectrum:
+            self.le_x_center = QLineEdit()
+            self.le_y_center = QLineEdit()
+            self.le_step = QLineEdit()
+            self.le_length = QLineEdit()
+            self.le_list = (
+                self.le_x_center,
+                self.le_y_center,
+                self.le_step,
+                self.le_length,
+            )
+        else:
+            self.le_x_start = QLineEdit()
+            self.le_y_start = QLineEdit()
+            self.le_x_end = QLineEdit()
+            self.le_y_end = QLineEdit()
+            self.le_list = (
+                self.le_x_start,
+                self.le_y_start,
+                self.le_x_end,
+                self.le_y_end,
+            )
+        for le in self.le_list:
             le.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
             le.setValidator(validator_int)
 
@@ -146,15 +159,19 @@ class LineWindow(QMainWindow):
         self.layout.addWidget(self.pb_edit_color, *PB_EDIT_COLOR_LOCATION)
         self.layout.addWidget(self.l_x_start, *L_X_START_LOCATION)
         self.layout.addWidget(self.l_y_start, *L_Y_START_LOCATION)
-        self.layout.addWidget(self.le_x_start, *LE_X_START_LOCATION)
-        self.layout.addWidget(self.le_y_start, *LE_Y_START_LOCATION)
         self.layout.addWidget(self.l_x_end, *L_X_END_LOCATION)
         self.layout.addWidget(self.l_y_end, *L_Y_END_LOCATION)
-        self.layout.addWidget(self.le_x_end, *LE_X_END_LOCATION)
-        self.layout.addWidget(self.le_y_end, *LE_Y_END_LOCATION)
         if self.is_spectrum:
+            self.layout.addWidget(self.le_x_center, *LE_X_START_LOCATION)
+            self.layout.addWidget(self.le_y_center, *LE_Y_START_LOCATION)
+            self.layout.addWidget(self.le_step, *LE_X_END_LOCATION)
+            self.layout.addWidget(self.le_length, *LE_Y_END_LOCATION)
             self.layout.addWidget(self.pb_print_spectrum, *PB_PRINT_LINE_LOCATION)
         else:
+            self.layout.addWidget(self.le_x_start, *LE_X_START_LOCATION)
+            self.layout.addWidget(self.le_y_start, *LE_Y_START_LOCATION)
+            self.layout.addWidget(self.le_x_end, *LE_X_END_LOCATION)
+            self.layout.addWidget(self.le_y_end, *LE_Y_END_LOCATION)
             self.layout.addWidget(self.pb_print_line, *PB_PRINT_LINE_LOCATION)
 
     def connecter(self) -> None:
@@ -183,9 +200,9 @@ class LineWindow(QMainWindow):
     def make_spectrum(self) -> None:
         if not self.le_is_valid():
             return
-        start_point = QPoint(int(self.le_x_start.text()), int(self.le_y_start.text()))
-        end_point = QPoint(start_point + QPoint(0, int(self.le_y_end.text())))
-        step = float(self.le_x_end.text())
+        start_point = QPoint(int(self.le_x_center.text()), int(self.le_y_center.text()))
+        end_point = QPoint(start_point + QPoint(0, int(self.le_length.text())))
+        step = float(self.le_step.text())
         cur_angle = 0
         while cur_angle < 360:
             rotate(end_point, start_point, step)
@@ -201,12 +218,7 @@ class LineWindow(QMainWindow):
 
     def le_is_valid(self) -> bool:
         is_valid = True
-        for le in (
-            self.le_x_start,
-            self.le_y_start,
-            self.le_x_end,
-            self.le_y_end,
-        ):
+        for le in self.le_list:
             if (not le.text() or le.text() == FORBIDDEN_STR) and is_valid:
                 is_valid = False
                 self.msg_box.setWindowTitle("Инфо")
