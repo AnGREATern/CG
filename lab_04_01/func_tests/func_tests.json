@@ -1,0 +1,49 @@
+[
+    {
+    "name": "test_1",
+    "desc": "Спектр. Библиотечный алгоритм",
+    "data": 
+        [
+            {   
+            "algorithm": "Библиотечный",
+            "operation": "spectrum",
+            "centerX": 400,
+            "centerY": 400,
+            "radius": 100,
+            "step": 30,
+            "count": 40
+            }
+        ]
+    },
+    {
+    "name": "test_2",
+    "desc": "Спектр. Каноническое уравнение",
+    "data": 
+        [
+            {   
+            "algorithm": "Каноническое уравнение",
+            "operation": "spectrum",
+            "centerX": 300,
+            "centerY": 300,
+            "radius": 10,
+            "step": 10,
+            "count": 10
+            }
+        ]
+    },
+    {
+        "name": "test_3",
+        "desc": "Эллипс. Алгоритм Брезенхема",
+        "data": 
+            [
+                {   
+                "algorithm": "Алгоритм Брезенхема",
+                "operation": "ellipse",
+                "centerX": 300,
+                "centerY": 300,
+                "rX": 200,
+                "rY": 27
+                }
+            ]
+        }
+]
