@@ -219,16 +219,10 @@ def wu_impl(plot: QImage, start_point: QPoint, end_point: QPoint, color: QColor)
             new_pix = plot_pixel(
                 plot, QPointF(x, floor(intery) + 1), color, intery - int(intery)
             )
-            if intery - int(intery) > EPS:
-                cnt += is_step(new_pix - last_pix)
-                last_pix = new_pix
         else:
             new_pix = plot_pixel(
                 plot, QPointF(floor(intery), x), color, 1 - intery + int(intery)
             )
-            if 1 - intery + int(intery) > EPS:
-                cnt += is_step(new_pix - last_pix)
-                last_pix = new_pix
             new_pix = plot_pixel(
                 plot, QPointF(floor(intery) + 1, x), color, intery - int(intery)
             )
