@@ -116,24 +116,32 @@ class Main(QMainWindow):
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if self.graph.rect().contains(event.pos()):
             self.points[-1].append(event.pos() - GRAPH_BORDER)
-            self.front_img.setPixel(self.points[-1][-1], QColor(*consts.LINE_COLOR_DEFAULT).rgba())
+            self.front_img.setPixel(
+                self.points[-1][-1], QColor(*consts.LINE_COLOR_DEFAULT).rgba()
+            )
             if len(self.points[-1]) > 1:
                 self.print_line(self.points[-1][-2], self.points[-1][-1])
             self.output_foreground()
-            
+
     def fill_polygon(self):
-        self.close_polyline()
-        barrier_fill(self.front_img, self.points, self.fill_color)
-        self.output_foreground()
-    
+        if self.points[0] and not self.points[-1] or self.close_polyline():
+            barrier_fill(
+                self.front_img, self.points, self.fill_color, self.output_foreground
+            )
+
     def slow_fill_polygon(self):
-        self.close_polyline()
-        barrier_fill(self.front_img, self.points, self.fill_color, self.output_foreground)
-        # self.output_foreground()
-            
+        if self.points[0] and not self.points[-1] or self.close_polyline():
+            barrier_fill(
+                self.front_img,
+                self.points,
+                self.fill_color,
+                self.output_foreground,
+                consts.DELAY,
+            )
+
     def print_line(self, a: QPoint, b: QPoint):
         painter = QPainter(self.front_img)
-        painter.setPen(QColor(*consts.LINE_COLOR_DEFAULT))    
+        painter.setPen(QColor(*consts.LINE_COLOR_DEFAULT))
         painter.drawLine(a.x(), a.y(), b.x(), b.y())
         painter.end()
 
@@ -142,16 +150,21 @@ class Main(QMainWindow):
         self.scene.clear()
         self.front_img.fill(QColor(*consts.BACK_COLOR_DEFAULT))
 
-    def close_polyline(self) -> None:
+    def close_polyline(self) -> bool:
+        rc = False
         if len(self.points[-1]) < 3:
             self.msg_box.setWindowTitle("Ничего не получится")
-            self.msg_box.setText("Чтобы получить многоугольник, необходимо поставить как минимум 3 точки на экране.\n"
-                                 + "Нажмите на полотно, чтобы поставить точку")
+            self.msg_box.setText(
+                "Чтобы получить многоугольник, необходимо поставить как минимум 3 точки на экране.\n"
+                + "Нажмите на полотно, чтобы поставить точку"
+            )
             self.msg_box.show()
         else:
             self.print_line(self.points[-1][0], self.points[-1][-1])
             self.points.append([])
             self.output_foreground()
+            rc = True
+        return rc
 
     def edit_fill_color(self) -> None:
         self.col_dlg.exec()
@@ -162,10 +175,12 @@ class Main(QMainWindow):
             self.msg_box.setText("Цвет заливки должен отличаться от цвета границ")
             self.msg_box.show()
 
-    def output_foreground(self) -> None:
+    def output_foreground(self, is_slow: bool = False) -> None:
         self.scene.clear()
         self.front_pix.convertFromImage(self.front_img)
         self.scene.addPixmap(self.front_pix)
+        if is_slow:
+            QApplication.processEvents()
 
     def draw_picture(self, filename: str) -> None:
         image = QImage(self.scene.sceneRect().size().toSize(), QImage.Format_ARGB32)
@@ -192,7 +207,8 @@ class Main(QMainWindow):
             "Нажмите на полотно, чтобы поставить точку.\n"
             + "Точки последовательно соединяются рёбрами (в порядке, в котором Вы вводите точки).\n"
             + "Когда Вы добавили все точки многоугольника, нажмите на кнопку "
-            + '"Замкнуть".')
+            + '"Замкнуть текущую ломанную".'
+        )
         self.msg_box.show()
 
 
