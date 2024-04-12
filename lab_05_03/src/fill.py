@@ -27,7 +27,7 @@ def sign(x: int | float) -> int:
     return ans
 
 
-def row_fill(plot: QImage, start: QPoint, x_bar: int, color: QColor) -> QPoint:
+def row_fill(plot: QImage, start: QPoint, x_bar: int, color: QColor) -> None:
     cur = QPoint(start)
     step = QPoint(sign(x_bar - cur.x()), 0)
     while cur.x() != x_bar:

@@ -3,6 +3,7 @@ SHELL := /bin/bash
 OUT_DIR := out/
 RESULT_DIR := results/
 FUNC_DIR := func_tests/
+UNITS := unit_tests/*.py
 SRCS := src/*.py
 FUNCS := ${FUNC_DIR}*.py
 
@@ -14,15 +15,18 @@ REMOVE := rm -f
 REMOVE_DIR := rm -rf
 MOVE := mv
 
-report-unittesting-latest.txt :
-	echo -n "Процент покрытия: 0.00% " > $@
+report-unittesting-latest.txt : ${UNITS} ${SRCS}
+	coverage run -m unittest ${UNITS}
+	echo -n "Процент покрытия: " > $@
+	coverage report src/fill.py | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	${REMOVE} .coverage
 
 report-functesting-latest.txt : ${FUNC_DIR}func_tests.json ${FUNCS} ${SRCS} ${RESULT_DIR}
 	coverage run ${FUNCS}
 	bash ${FUNC_DIR}func_tests_desc.sh
 	echo -n "Процент покрытия: " > $@
 	coverage report ${SRCS} | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
-	echo "Время выполнения тестов в мс:" >> $@
+	echo "Время выполнения тестов в мкс:" >> $@
 	cat temp >> $@
 	${REMOVE} .coverage temp
 
