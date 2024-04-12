@@ -122,14 +122,12 @@ class Main(QMainWindow):
             self.output_foreground()
             
     def fill_polygon(self):
-        if len(self.points[-1]) >= 3:
-            self.close_polyline()
+        self.close_polyline()
         barrier_fill(self.front_img, self.points, self.fill_color)
         self.output_foreground()
     
     def slow_fill_polygon(self):
-        if len(self.points[-1]) >= 3:
-            self.close_polyline()
+        self.close_polyline()
         barrier_fill(self.front_img, self.points, self.fill_color, self.output_foreground)
         # self.output_foreground()
             
