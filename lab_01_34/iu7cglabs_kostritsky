@@ -13,7 +13,7 @@ MOVE := mv
 report-unittesting-latest.txt : ${UNITS}
 	coverage run -m unittest ${UNITS}
 	echo -n " " > $@
-	coverage report | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	coverage report ${SRCS} | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
 	${REMOVE} .coverage
 
 ${OUT_DIR}:

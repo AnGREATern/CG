@@ -18,14 +18,14 @@ MOVE := mv
 report-unittesting-latest.txt : ${UNITS} ${SRCS}
 	coverage run -m unittest ${UNITS}
 	echo -n " " > $@
-	coverage report src/geom.py | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	coverage report ${SRCS} | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
 	${REMOVE} .coverage
 
 report-functesting-latest.txt : ${FUNC_DIR}func_tests.json ${FUNCS} ${SRCS} ${RESULT_DIR}
 	coverage run ${FUNCS}
 	bash ${FUNC_DIR}func_tests_desc.sh
 	echo -n " " > $@
-	coverage report ${SRCS} | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	coverage report | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
 	echo "Время выполнения тестов в мс:" >> $@
 	cat temp >> $@
 	${REMOVE} .coverage temp
