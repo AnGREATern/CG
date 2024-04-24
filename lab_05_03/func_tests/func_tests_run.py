@@ -26,9 +26,9 @@ with open("./func_tests/func_tests.json") as input_file:
                 if len(picture.points[-1]) > 1:
                     picture.print_line(picture.points[-1][-2], picture.points[-1][-1])
             picture.close_polyline()
-            start_time = datetime.now()
-            total_time += (datetime.now() - start_time).microseconds
+        start_time = datetime.now()
         picture.fill_polygon()
+        total_time = (datetime.now() - start_time).microseconds
         picture.draw_picture("results/" + data["name"])
         with open("temp", "a") as output_file:
-            output_file.write(data["name"] + "\t" + str(total_time) + "\n")
+            output_file.write(data["name"] + "\t" + str(total_time // 1000) + "\n")
