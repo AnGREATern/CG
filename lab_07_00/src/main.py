@@ -101,34 +101,40 @@ class Main(QMainWindow):
         cur_point = event.pos() - GRAPH_BORDER
         if self.graph.rect().contains(cur_point):
             if event.button() == Qt.MouseButton.LeftButton:
-                if not self.segment.p1():
-                    self.segment.setP1(cur_point)
-                elif not self.segment.p2():
-                    self.segment.setP2(cur_point)
-                    self.print_figure(self.segment)
-                else:
-                    self.reset(True)
-                    self.segment.setP1(cur_point)
-                    self.segment.setP2(QPoint())
-                    self.print_figure(self.rectangle)
+                self.add_point_in_segment(cur_point)
             elif event.button() == Qt.MouseButton.RightButton:
-                if self.rectangle.topLeft() == RECT_NULL_POINT:
-                    self.rectangle.setTopLeft(cur_point)
-                elif (
-                    self.rectangle.bottomRight() == RECT_NULL_POINT
-                    and self.rectangle.topLeft() != cur_point
-                ):
-                    self.rectangle.setBottomRight(cur_point)
-                    self.print_figure(self.rectangle)
-                elif self.rectangle.topLeft() != cur_point:
-                    self.reset(True)
-                    self.rectangle.setTopLeft(cur_point)
-                    self.rectangle.setBottomRight(RECT_NULL_POINT)
-                    self.print_figure(self.segment)
+                self.add_point_in_rectangle(cur_point)
             self.front_img.setPixel(
                 cur_point, QColor(*consts.LINE_COLOR_DEFAULT).rgba()
             )
             self.output_foreground()
+
+    def add_point_in_rectangle(self, point: QPoint):
+        if self.rectangle.topLeft() == RECT_NULL_POINT:
+            self.rectangle.setTopLeft(point)
+        elif (
+            self.rectangle.bottomRight() == RECT_NULL_POINT
+            and self.rectangle.topLeft() != point
+        ):
+            self.rectangle.setBottomRight(point)
+            self.print_figure(self.rectangle)
+        elif self.rectangle.topLeft() != point:
+            self.reset(True)
+            self.rectangle.setTopLeft(point)
+            self.rectangle.setBottomRight(RECT_NULL_POINT)
+            self.print_figure(self.segment)
+
+    def add_point_in_segment(self, point: QPoint):
+        if not self.segment.p1():
+            self.segment.setP1(point)
+        elif not self.segment.p2():
+            self.segment.setP2(point)
+            self.print_figure(self.segment)
+        else:
+            self.reset(True)
+            self.segment.setP1(point)
+            self.segment.setP2(QPoint())
+            self.print_figure(self.rectangle)
 
     def clip_segment(self) -> None:
         if self.rectangle.bottomRight() == RECT_NULL_POINT or not self.segment.p2():
