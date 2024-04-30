@@ -21,7 +21,7 @@ def get_line_code(line: QLine, rect: QRect) -> tuple[int, int, int, int]:
     return *get_point_code(line.p1(), rect), *get_point_code(line.p2(), rect)
 
 
-def clip(print_figure, line: QLine, rect: QRect) -> QLine:
+def clip(print_figure, line: QLine, rect: QRect) -> None:
     t1, s1, t2, s2 = get_line_code(line, rect)
     rc = True
     if QVector2D(line.p2() - line.p1()).length() < EPS:
