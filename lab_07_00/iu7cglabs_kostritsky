@@ -1,0 +1,53 @@
+SHELL := /bin/bash
+
+OUT_DIR := out/
+RESULT_DIR := results/
+FUNC_DIR := func_tests/
+SRCS := src/*.py
+FUNCS := ${FUNC_DIR}*.py
+
+ADDED_DIRS := ${OUT_DIR} ${RESULT_DIR}
+
+MAKE_DIR := mkdir -p
+COPY := cp -f
+REMOVE := rm -f
+REMOVE_DIR := rm -rf
+MOVE := mv
+
+report-unittesting-latest.txt : ${SRCS}
+	echo -n "Процент покрытия: 0.00%" > $@
+
+report-functesting-latest.txt : ${FUNC_DIR}func_tests.json ${FUNCS} ${SRCS} ${RESULT_DIR}
+	coverage run ${FUNCS}
+	bash ${FUNC_DIR}func_tests_desc.sh
+	echo -n "Процент покрытия: " > $@
+	coverage report | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	echo "Время выполнения тестов в мс:" >> $@
+	cat temp >> $@
+	${REMOVE} .coverage temp
+
+${ADDED_DIRS}:
+	${MAKE_DIR} $@
+
+.PHONY : run clean release format checkall saveolds
+
+run : release 
+	python3 ${OUT_DIR}main.py
+
+clean :
+	${REMOVE} report-unittesting-latest.txt
+	${REMOVE} report-functesting-latest.txt
+	${REMOVE_DIR} ${ADDED_DIRS}
+
+release : ${OUT_DIR} 
+	${COPY} ${SRCS} ${OUT_DIR}
+
+format :
+	ruff format
+
+checkall :
+	ruff check
+
+saveolds :
+	${COPY} report-unittesting-latest.txt report-unittesting-old.txt
+	${COPY} report-functesting-latest.txt report-functesting-old.txt
