@@ -97,7 +97,7 @@ class Main(QMainWindow):
         self.pb_clear_all.clicked.connect(self.canvas.clearAll)
 
     def savePicture(self, filename: str) -> None:
-        self.canvas.save(filename)
+        self.canvas.saveImage(filename)
 
     def showAbout(self) -> None:
         self.msg_box.setWindowTitle("Об авторе")

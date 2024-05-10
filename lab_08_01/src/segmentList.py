@@ -1,19 +1,21 @@
 import consts
 from PyQt5.QtGui import QColor, QImage, QPainter
-from PyQt5.QtCore import QPoint, QLine
+from PyQt5.QtCore import QPoint, QPointF, QLineF
 
 BACK = -1
 
 
 class SegmentList:
     def __init__(self, image: QImage) -> None:
-        self.segments: list[QLine] = []
+        self.segments: list[QLineF] = []
         self.image = image
 
-    def addPoint(self, point: QPoint) -> None:
+    def addPoint(self, point: QPoint | QPointF) -> None:
+        if isinstance(point, QPointF):
+            point = QPoint(int(point.x()), int(point.y()))
         self.image.setPixelColor(point, QColor(*consts.SEGMENT_COLOR_DEFAULT))
         if not self.segments or self.segments[BACK].p2():
-            self.segments.append(QLine())
+            self.segments.append(QLineF())
         if not self.segments[BACK].p1():
             self.segments[BACK].setP1(point)
         elif not self.segments[BACK].p2():
@@ -31,4 +33,4 @@ class SegmentList:
         painter.end()
 
     def clear(self) -> None:
-        self.segments: list[QLine] = []
+        self.segments: list[QLineF] = []
