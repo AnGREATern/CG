@@ -97,7 +97,7 @@ class Main(QMainWindow):
         self.pb_clip.clicked.connect(self.canvas.clip)
         self.pb_close_polygon.clicked.connect(self.canvas.closePolygon)
         self.pb_close_clipper.clicked.connect(self.canvas.closeClipper)
-        self.pb_clear_polygon.clicked.connect(self.canvas.clearPolygon)
+        self.pb_clear_polygon.clicked.connect(self.canvas.clearPolygons)
         self.pb_clear_clipper.clicked.connect(self.canvas.clearClipper)
         self.pb_clear_all.clicked.connect(self.canvas.clearAll)
 

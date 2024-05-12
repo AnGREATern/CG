@@ -1,7 +1,7 @@
 import consts
 from segmentList import SegmentList
 from PyQt5.QtGui import QColor, QImage, QPainter, QPolygon
-from PyQt5.QtCore import QPoint, QLineF
+from PyQt5.QtCore import QPoint, QLineF, QPointF
 
 
 class Polygon(QPolygon):
@@ -11,17 +11,17 @@ class Polygon(QPolygon):
         self.color = color
         self.is_closed = False
 
-    def addPoint(self, point: QPoint) -> None:
+    def addPoint(self, point: QPoint | QPointF) -> None:
         if not self.is_closed:
+            if isinstance(point, QPointF):
+                point = QPoint(int(point.x()), int(point.y()))
             self.image.setPixelColor(point, self.color)
             self.putPoints(self.size(), point.x(), point.y())
             self.drawLine(self.pointAt(-2), self.pointAt(-1))
 
     def closePolygon(self) -> None:
-        if not self.is_closed:
-            self.is_closed = self.drawLine(
-                self.pointAt(0), self.pointAt(self.size() - 1)
-            )
+        if not self.is_closed and self.size():
+            self.is_closed = self.drawLine(self.pointAt(0), self.pointAt(-1))
 
     def clear(self) -> None:
         super().clear()

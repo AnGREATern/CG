@@ -15,6 +15,7 @@ class TestPolygon(unittest.TestCase):
         polygon = Polygon(QImage(100, 100, QImage.Format_ARGB32))
         polygon.addPoint(QPoint(1, 0))
         self.assertEqual(polygon.size(), 1)
+        self.assertEqual(polygon.pointAt(0), QPoint(1, 0))
 
     def testCenter(self):
         polygon = Polygon(QImage(100, 100, QImage.Format_ARGB32))
