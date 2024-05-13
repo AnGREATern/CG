@@ -52,13 +52,13 @@ class Canvas(QGraphicsView):
         self.polygon.clear()
         self.clearImage()
         self.updateImage()
-    
+
     def clearClipper(self) -> None:
         self.clipper.clear()
         self.clearImage()
         self.polygon.draw()
         self.updateImage()
-        
+
     def closeClipper(self) -> None:
         self.clipper.closePolygon()
         self.updateImage()
@@ -72,7 +72,7 @@ class Canvas(QGraphicsView):
     def closePolygon(self) -> None:
         self.polygon.closePolygon()
         self.updateImage()
-        
+
     def __isCorrectPolygons(self) -> bool:
         is_ok = True
         if not self.polygon.is_closed:
@@ -84,7 +84,7 @@ class Canvas(QGraphicsView):
         if not is_ok:
             self.msg_box.show()
         return is_ok
-        
+
     def clip(self) -> None:
         if not self.__isCorrectPolygons():
             return
@@ -104,7 +104,7 @@ class Canvas(QGraphicsView):
             self.polygon = res
         self.polygon.draw()
         self.updateImage()
-    
+
     def __isPointVisible(self, point: QPoint, edge: QLineF, center: QPoint) -> bool:
         w = QLineF(edge.p1(), point)
         w_vec = QVector2D(w.dx(), w.dy())
@@ -114,7 +114,7 @@ class Canvas(QGraphicsView):
         else:
             n_vec = QVector2D(n.dx(), n.dy())
         return QVector2D.dotProduct(w_vec, n_vec) >= 0
- 
+
     def mousePressEvent(self, event: QMouseEvent) -> None:
         cur_point = event.pos()
         if self.rect().contains(cur_point):

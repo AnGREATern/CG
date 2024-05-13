@@ -5,7 +5,9 @@ from PyQt5.QtCore import QPoint, QLineF, QPointF
 
 
 class Polygon(QPolygon):
-    def __init__(self, image: QImage, color: QColor = QColor(*consts.POLYGON_COLOR_DEFAULT)) -> None:
+    def __init__(
+        self, image: QImage, color: QColor = QColor(*consts.POLYGON_COLOR_DEFAULT)
+    ) -> None:
         super().__init__()
         self.image = image
         self.color = color
