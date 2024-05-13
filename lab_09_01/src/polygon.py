@@ -20,7 +20,7 @@ class Polygon(QPolygon):
             self.drawLine(self.pointAt(-2), self.pointAt(-1))
 
     def closePolygon(self) -> None:
-        if not self.is_closed and self.size():
+        if not self.is_closed and self.size() > 2:
             self.is_closed = self.drawLine(self.pointAt(0), self.pointAt(-1))
 
     def clear(self) -> None:
@@ -39,7 +39,7 @@ class Polygon(QPolygon):
         return ans
 
     def pointAt(self, index: int) -> QPoint:
-        return self.point((index + self.size()) % self.size())
+        return self.point(index % self.size())
 
     def edges(self) -> SegmentList:
         ans = SegmentList(self.image)

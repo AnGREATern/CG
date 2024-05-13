@@ -25,7 +25,7 @@ report-functesting-latest.txt : ${FUNC_DIR}func_tests.json ${FUNCS} ${SRCS} ${RE
 	coverage run ${FUNCS}
 	bash ${FUNC_DIR}func_tests_desc.sh
 	echo -n "Процент покрытия: " > $@
-	coverage report | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
+	coverage report ${SRCS} | awk '$$1 == "TOTAL" {print $$NF+0 ".00%"}' >> $@
 	echo "Время выполнения тестов в мкс:" >> $@
 	cat temp >> $@
 	${REMOVE} .coverage temp
