@@ -12,7 +12,7 @@ class TestGeom(unittest.TestCase):
         super().__init__(methodName)
 
     def testAddPoint(self):
-        res = plot_pixel(QImage(), QPointF(1.1, 245.2), QColor('r'))
+        res = plot_pixel(QImage(), QPointF(1.1, 245.2), QColor("r"))
         self.assertEqual(res, QPoint(1, 245))
 
 
