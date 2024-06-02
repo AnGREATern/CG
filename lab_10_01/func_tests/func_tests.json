@@ -1,0 +1,41 @@
+[
+    {
+    "name": "test_1",
+    "desc": "y = x + z / 5. Без поворота",
+    "function": "x + z / 5",
+    "start_x": 1,
+    "end_x": 11,
+    "step_x": 0.05,
+    "start_z": 0,
+    "end_z": 10,
+    "step_z": 0.05,
+    "axis": "OX",
+    "angle": 0
+    },
+    {
+    "name": "test_2",
+    "desc": "y = x + z / 5. Поворот вокруг OY 30 градусов",
+    "function": "x + z / 5",
+    "start_x": 1,
+    "end_x": 11,
+    "step_x": 0.05,
+    "start_z": 0,
+    "end_z": 10,
+    "step_z": 0.05,
+    "axis": "OY",
+    "angle": 30
+    },
+    {
+    "name": "test_3",
+    "desc": "y = sin(x) ** 2 - cos(z) ** 2",
+    "function": "sin(x) ** 2 - cos(z) ** 2",
+    "start_x": -10,
+    "end_x": 10,
+    "step_x": 0.05,
+    "start_z": 0,
+    "end_z": 10,
+    "step_z": 0.05,
+    "axis": "OX",
+    "angle": 0
+    }
+]
