@@ -1,6 +1,7 @@
 import consts
 from canvas import Canvas
 from sys import argv
+from numpy import arange
 from PyQt5.QtGui import QFont, QRegExpValidator
 from PyQt5.QtWidgets import (
     QApplication,
@@ -61,6 +62,9 @@ class Main(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.validator_int = QRegExpValidator(QRegExp("^[+-]?[0-9][0-9]*$"))
+        self.validator_float = QRegExpValidator(
+            QRegExp("^[+-]?[0-9][0-9]*[.,]?[0-9]*$")
+        )
 
         self.canvas = Canvas()
         self.uiButtons()
@@ -91,10 +95,10 @@ class Main(QMainWindow):
         )
         for le in (*self.build_le, self.le_phi):
             le.setFont(QFont(consts.FONT_TYPE, consts.FONT_STANDARD_SIZE))
-            le.setValidator(self.validator_int)
+            le.setValidator(self.validator_float)
 
     def uiLabels(self) -> None:
-        self.l_rotate = QLabel("Поворот по оси:")
+        self.l_rotate = QLabel("Поворот вокруг оси")
         self.l_x = QLabel("X:")
         self.l_z = QLabel("Z:")
         self.l_from = QLabel("От:")
@@ -116,7 +120,7 @@ class Main(QMainWindow):
 
     def uiComboBoxes(self) -> None:
         self.cb_axis = QComboBox()
-        self.cb_axis.addItems(("X", "Y", "Z"))
+        self.cb_axis.addItems(("OX", "OY", "OZ"))
         self.cb_func = QComboBox()
         self.cb_func.addItems(consts.FUNCS)
         for cb in (self.cb_axis, self.cb_func):
@@ -183,15 +187,15 @@ class Main(QMainWindow):
     def buildFigure(self) -> None:
         if self.isLeValid(self.build_le):
             self.canvas.clearAll()
-            x_range = range(
-                int(self.le_x_from.text()),
-                int(self.le_x_to.text()) + 1,
-                int(self.le_x_step.text()),
+            x_range = arange(
+                float(self.le_x_from.text()),
+                float(self.le_x_to.text()),
+                float(self.le_x_step.text()),
             )
-            z_range = range(
-                int(self.le_z_to.text()),
-                int(self.le_z_from.text()),
-                -int(self.le_z_step.text()),
+            z_range = arange(
+                float(self.le_z_to.text()),
+                float(self.le_z_from.text()),
+                -float(self.le_z_step.text()),
             )
             phi = 0
             if self.isLeValid([self.le_phi], False):
@@ -202,11 +206,7 @@ class Main(QMainWindow):
             elif self.cb_axis.currentText() == "OY":
                 axis = OY
             self.canvas.buildFigure(
-                x_range,
-                z_range,
-                self.cb_func.currentText(),
-                axis,
-                phi
+                x_range, z_range, self.cb_func.currentText(), axis, phi
             )
 
     def savePicture(self, filename: str) -> None:

@@ -1,11 +1,13 @@
 import consts
 from PyQt5.QtGui import QFont, QColor, QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QMessageBox, QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import QSize, QPoint
+from PyQt5.QtCore import QSize, QPoint, QPointF
+from numpy import ndarray
 from math import radians, cos, sin
 
 
-CANVAS_SIZE = QSize(930, 740)
+CANVAS_SIZE = QSize(930, 796)
+SCALING_FACTOR = 50
 INVISIBLE = 0
 ABOVE = 1
 BELOW = -1
@@ -14,8 +16,8 @@ OY = 1
 OZ = 2
 
 
-def f(func: str, x: int, z: int) -> int:
-    return round(eval(func.replace("x", str(x)).replace("z", str(z))))
+def f(func: str, x: float, z: float) -> float:
+    return eval(func.replace("x", str(x)).replace("z", str(z)))
 
 
 def sign(x: float) -> int:
@@ -69,21 +71,25 @@ class Canvas(QGraphicsView):
         self.clearImage()
         self.updateImage()
 
-    def rotateFigure(self, point: QPoint, z: int, axis: int, phi: int) -> None:
+    def rotatePoint(self, point: QPointF, z: int, axis: int, phi: int) -> QPoint:
         phi = radians(phi)
         if axis == OX:
-            pr_y = point.y()
-            point.setY(round(cos(phi) * pr_y - sin(phi) * z))
-            z = round(cos(phi) * z + sin(phi) * pr_y)
+            res = QPointF(point.x(), cos(phi) * point.y() - sin(phi) * z)
+            z = cos(phi) * z + sin(phi) * point.y()
         elif axis == OY:
-            pr_x = point.x()
-            point.setX(round(cos(phi) * pr_x - sin(phi) * z))
-            z = round(cos(phi) * z + sin(phi) * pr_x)
+            res = QPointF(cos(phi) * point.x() - sin(phi) * z, point.y())
+            z = cos(phi) * z + sin(phi) * point.x()
         elif axis == OZ:
-            pr_x = point.x()
-            point.setX(round(cos(phi) * pr_x - sin(phi) * point.y()))
-            point.setY(round(cos(phi) * point.y() + sin(phi) * pr_x))
-            
+            res = QPointF(
+                cos(phi) * point.x() - sin(phi) * point.y(),
+                cos(phi) * point.y() + sin(phi) * point.x(),
+            )
+        return self.adaptPoint(res)
+
+    def adaptPoint(self, point: QPointF) -> QPoint:
+        point *= SCALING_FACTOR
+        return QPoint(round(point.x()), round(point.y()))
+
     def updateHorizons(self, start: QPoint, end: QPoint) -> None:
         if not (1 <= start.x() < len(self.top)):
             if not (1 <= end.x() < len(self.top)):
@@ -93,14 +99,12 @@ class Canvas(QGraphicsView):
         if start == end and 1 <= start.x() < len(self.top):
             if start.y() > self.top[start.x()]:
                 self.top[start.x()] = start.y()
-                # self.front_img.setPixel(start, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba())
                 self.points.append(start)
             if start.y() < self.bottom[start.x()]:
                 self.bottom[start.x()] = start.y()
-                # self.front_img.setPixel(start, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba())
                 self.points.append(start)
         else:
-            d: QPoint = end - start          
+            d: QPoint = end - start
             if abs(d.x()) < abs(d.y()):
                 step = QPoint(sign(d.x()), 0)
                 d = QPoint(abs(d.y()), abs(d.x()))
@@ -116,11 +120,9 @@ class Canvas(QGraphicsView):
             i = 0
             while i < d.x() and 1 < start.x() < len(self.top):
                 if start.y() > self.top[start.x()]:
-                    # self.front_img.setPixel(start, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba())
                     self.points.append(start)
                     y_top = max(y_top, start.y())
                 if start.y() < self.bottom[start.x()]:
-                    # self.front_img.setPixel(start, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba())
                     self.points.append(start)
                     y_bottom = min(y_bottom, start.y())
                 if e >= 0:
@@ -142,39 +144,40 @@ class Canvas(QGraphicsView):
                 i += 1
 
     def buildFigure(
-        self, x_range: range, z_range: range, func: str, axis: int, phi: int
+        self, x_range: ndarray, z_range: ndarray, func: str, axis: int, phi: int
     ) -> None:
         self.top = [0] * CANVAS_SIZE.width()
         self.bottom = [CANVAS_SIZE.height()] * CANVAS_SIZE.width()
         left = QPoint(-1, -1)
         right = QPoint(-1, -1)
         for z in z_range:
-            pr = QPoint(x_range.start, f(func, x_range.start, z))
-            self.rotateFigure(pr, z, axis, phi)
+            pr = self.rotatePoint(
+                QPointF(x_range[0], f(func, x_range[0], z)), z, axis, phi
+            )
             if left.x() != -1:
-                self.updateHorizons(pr, left)
-            left = pr
+                self.updateHorizons(QPoint(pr), left)
+            left = QPoint(pr)
             for x in x_range:
                 y = f(func, x, z)
-                cur = QPoint(x, y)
-                self.rotateFigure(cur, z, axis, phi)
-                self.updateHorizons(pr, cur)
-                pr = cur
+                cur = self.rotatePoint(QPointF(x, y), z, axis, phi)
+                self.updateHorizons(QPoint(pr), cur)
+                pr = QPoint(cur)
             if left.x() != -1:
-                self.updateHorizons(pr, right)
-            right = pr
+                self.updateHorizons(QPoint(pr), right)
+            right = QPoint(pr)
         self.printPoints()
-        
+
     def printPoints(self) -> None:
-        left_top = QPoint(self.points[0])
-        right_bottom = QPoint(self.points[0])
-        for point in self.points:
-            left_top.setX(min(left_top.x(), point.x()))
-            left_top.setY(min(left_top.y(), point.y()))
-            right_bottom.setX(max(right_bottom.x(), point.x()))
-            right_bottom.setY(max(right_bottom.y(), point.y()))
-        d = right_bottom - left_top
-        k = max(d.x() / (CANVAS_SIZE.width() - 1), d.y() / (CANVAS_SIZE.height() - 1))
-        for point in self.points:
-            self.front_img.setPixel((point - left_top) / k, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba())
-        self.updateImage()
+        if self.points:
+            left_top = QPoint(self.points[0])
+            right_bottom = QPoint(self.points[0])
+            for point in self.points:
+                left_top.setX(min(left_top.x(), point.x()))
+                left_top.setY(min(left_top.y(), point.y()))
+                right_bottom.setX(max(right_bottom.x(), point.x()))
+                right_bottom.setY(max(right_bottom.y(), point.y()))
+            for point in self.points:
+                self.front_img.setPixel(
+                    point - left_top, QColor(*consts.SEGMENT_COLOR_DEFAULT).rgba()
+                )
+            self.updateImage()
